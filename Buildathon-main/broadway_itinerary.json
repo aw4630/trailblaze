@@ -1,0 +1,52 @@
+{
+  "itinerary_data": {
+    "name": "Broadway Show Experience",
+    "description": "Immerse yourself in the enchanting world of Broadway with this exciting itinerary in New York City!",
+    "events": [
+      {
+        "name": "Broadway Show - The Lion King",
+        "description": "Experience the magic of The Lion King on Broadway!",
+        "time": "7:00 PM"
+      }
+    ],
+    "venues": [
+      {
+        "name": "Minskoff Theatre",
+        "description": "Home to the iconic Broadway show - The Lion King",
+        "location": "200 W 45th St, New York, NY 10036"
+      }
+    ],
+    "routes": [
+      {
+        "mode": "Walk",
+        "start": "Your accommodation",
+        "end": "Minskoff Theatre",
+        "distance": "1.5 miles"
+      },
+      {
+        "mode": "Public Transport",
+        "start": "Minskoff Theatre",
+        "end": "Your accommodation",
+        "distance": "1.5 miles",
+        "details": "Take the subway or bus back to your accommodation."
+      }
+    ]
+  },
+  "success": false,
+  "issues_found": true,
+  "all_issues": [
+    "Travel times verification error: 'start_time'",
+    "Activity durations verification error: 'start_time'",
+    "Buffer times verification error: 'start_time'",
+    "Overall timing verification error: 'start_time'",
+    "Event 1 missing required field: id",
+    "Event 1 missing required field: start_time",
+    "Event 1 missing required field: end_time",
+    "Event 1 missing required field: venue_name",
+    "Venue 1 missing required field: address",
+    "Venue 1 missing required field: latitude",
+    "Venue 1 missing required field: longitude"
+  ],
+  "feedback_for_retry": "FORMAT ISSUES:\n- Event 1 missing required field: id\n- Event 1 missing required field: start_time\n- Event 1 missing required field: end_time\n- Event 1 missing required field: venue_name\n- Venue 1 missing required field: address\n- Venue 1 missing required field: latitude\n- Venue 1 missing required field: longitude\nPlease fix the JSON format issues above first.\n\nTRAVEL TIME ISSUES:\n- Travel times verification error: 'start_time'\nPlease allow more time between events or choose venues closer together.\n\nACTIVITY DURATION ISSUES:\n- Activity durations verification error: 'start_time'\nPlease adjust event durations to be more realistic.\n\nBUFFER TIME ISSUES:\n- Buffer times verification error: 'start_time'\nPlease ensure events don't overlap and have sufficient buffer times.\n\nOVERALL TIMING ISSUES:\n- Overall timing verification error: 'start_time'\nPlease adjust the overall timing of the itinerary.\n\nGENERAL GUIDANCE:\n- Ensure all events have valid ISO format dates and times (YYYY-MM-DDThh:mm:ss)\n- Broadway shows typically start at 7:00 PM or 8:00 PM and last about 2-3 hours\n- Restaurants in the Theater District typically open from 11:00 AM to 11:00 PM\n- Allow at least 30 minutes for travel between venues in Manhattan\n- Include pre-show dining with at least 1.5 hours before showtime",
+  "using_mock_data": false
+}

@@ -1,0 +1,102 @@
+/* Loading Spinner Styles */
+.spinner {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 20px auto;
+}
+
+.spinner:after {
+    content: " ";
+    display: block;
+    border-radius: 50%;
+    width: 0;
+    height: 0;
+    margin: 8px;
+    box-sizing: border-box;
+    border: 32px solid #4a90e2;
+    border-color: #4a90e2 transparent #4a90e2 transparent;
+    animation: spinner 1.2s infinite;
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0);
+        animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+    }
+    50% {
+        transform: rotate(180deg);
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Pulsating loading text */
+.loading-text {
+    animation: pulse 1.5s infinite;
+    display: inline-block;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
+
+/* Loading overlay - for full page loading */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-overlay .message {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+}
+
+/* Small spinner for inline use */
+.spinner-small {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.spinner-small:after {
+    content: " ";
+    display: block;
+    width: 16px;
+    height: 16px;
+    margin: 2px;
+    border-radius: 50%;
+    border: 2px solid #4a90e2;
+    border-color: #4a90e2 transparent #4a90e2 transparent;
+    animation: spinner 1.2s linear infinite;
+}
+
+/* Different spinner colors */
+.spinner-primary:after { border-color: #4a90e2 transparent #4a90e2 transparent; }
+.spinner-success:after { border-color: #5cb85c transparent #5cb85c transparent; }
+.spinner-warning:after { border-color: #f0ad4e transparent #f0ad4e transparent; }
+.spinner-danger:after { border-color: #d9534f transparent #d9534f transparent; } 

@@ -1,0 +1,11 @@
+{
+  "routeName": "Historical Manhattan Tour",
+  "measurementType": "distance",
+  "measurementValue": 3,
+  "transportModes": ["Walk", "Public Transport"],
+  "theme": "Historical Events",
+  "customPrompt": "I'd like to explore significant historical landmarks and sites in Manhattan, focusing on events from the early development of New York City through the 20th century. I'm particularly interested in the Revolutionary War period, the immigration boom of the late 19th/early 20th centuries, and important civil rights locations. Please include sites where I can learn about diverse perspectives on New York's history.",
+  "budget": {
+    "max": 150
+  }
+} 

@@ -1,0 +1,207 @@
+{
+  "itinerary": {
+    "name": "NYC Adventure",
+    "description": "Explore iconic landmarks in New York City within a 5-mile radius, using a combination of walking and public transportation, all under a budget of $100.",
+    "events": [
+      "Visit the Statue of Liberty",
+      "Explore Times Square",
+      "Walk through Central Park",
+      "Admire the view from the Empire State Building",
+      "Stroll around Rockefeller Center"
+    ],
+    "venues": [
+      "Statue of Liberty",
+      "Times Square",
+      "Central Park",
+      "Empire State Building",
+      "Rockefeller Center"
+    ],
+    "routes": [
+      {
+        "start": "Hotel",
+        "end": "Statue of Liberty",
+        "transportation": "Public Transport",
+        "cost": "$5"
+      },
+      {
+        "start": "Statue of Liberty",
+        "end": "Times Square",
+        "transportation": "Walk",
+        "cost": "$0"
+      },
+      {
+        "start": "Times Square",
+        "end": "Central Park",
+        "transportation": "Public Transport",
+        "cost": "$3"
+      },
+      {
+        "start": "Central Park",
+        "end": "Empire State Building",
+        "transportation": "Walk",
+        "cost": "$0"
+      },
+      {
+        "start": "Empire State Building",
+        "end": "Rockefeller Center",
+        "transportation": "Public Transport",
+        "cost": "$2"
+      },
+      {
+        "start": "Rockefeller Center",
+        "end": "Hotel",
+        "transportation": "Walk",
+        "cost": "$0"
+      }
+    ]
+  },
+  "verification": {
+    "is_feasible": false,
+    "total_issues": 55,
+    "all_issues": [
+      "Venue hours verification error: string indices must be integers, not 'str'",
+      "Travel times verification error: string indices must be integers, not 'str'",
+      "Activity durations verification error: string indices must be integers, not 'str'",
+      "Buffer times verification error: string indices must be integers, not 'str'",
+      "Overall timing verification error: string indices must be integers, not 'str'",
+      "Event 1 missing required field: id",
+      "Event 1 missing required field: name",
+      "Event 1 missing required field: description",
+      "Event 1 missing required field: start_time",
+      "Event 1 missing required field: end_time",
+      "Event 1 missing required field: venue_name",
+      "Event 2 missing required field: id",
+      "Event 2 missing required field: name",
+      "Event 2 missing required field: description",
+      "Event 2 missing required field: start_time",
+      "Event 2 missing required field: end_time",
+      "Event 2 missing required field: venue_name",
+      "Event 3 missing required field: id",
+      "Event 3 missing required field: name",
+      "Event 3 missing required field: description",
+      "Event 3 missing required field: start_time",
+      "Event 3 missing required field: end_time",
+      "Event 3 missing required field: venue_name",
+      "Event 4 missing required field: id",
+      "Event 4 missing required field: name",
+      "Event 4 missing required field: description",
+      "Event 4 missing required field: start_time",
+      "Event 4 missing required field: end_time",
+      "Event 4 missing required field: venue_name",
+      "Event 5 missing required field: id",
+      "Event 5 missing required field: name",
+      "Event 5 missing required field: description",
+      "Event 5 missing required field: start_time",
+      "Event 5 missing required field: end_time",
+      "Event 5 missing required field: venue_name",
+      "Venue 1 missing required field: name",
+      "Venue 1 missing required field: address",
+      "Venue 1 missing required field: latitude",
+      "Venue 1 missing required field: longitude",
+      "Venue 2 missing required field: name",
+      "Venue 2 missing required field: address",
+      "Venue 2 missing required field: latitude",
+      "Venue 2 missing required field: longitude",
+      "Venue 3 missing required field: name",
+      "Venue 3 missing required field: address",
+      "Venue 3 missing required field: latitude",
+      "Venue 3 missing required field: longitude",
+      "Venue 4 missing required field: name",
+      "Venue 4 missing required field: address",
+      "Venue 4 missing required field: latitude",
+      "Venue 4 missing required field: longitude",
+      "Venue 5 missing required field: name",
+      "Venue 5 missing required field: address",
+      "Venue 5 missing required field: latitude",
+      "Venue 5 missing required field: longitude"
+    ],
+    "details": {
+      "venue_hours": {
+        "is_feasible": false,
+        "issues": [
+          "Venue hours verification error: string indices must be integers, not 'str'"
+        ]
+      },
+      "travel_times": {
+        "is_feasible": false,
+        "issues": [
+          "Travel times verification error: string indices must be integers, not 'str'"
+        ]
+      },
+      "activity_durations": {
+        "is_feasible": false,
+        "issues": [
+          "Activity durations verification error: string indices must be integers, not 'str'"
+        ]
+      },
+      "buffer_times": {
+        "is_feasible": false,
+        "issues": [
+          "Buffer times verification error: string indices must be integers, not 'str'"
+        ]
+      },
+      "overall_timing": {
+        "is_feasible": false,
+        "issues": [
+          "Overall timing verification error: string indices must be integers, not 'str'"
+        ]
+      },
+      "format": {
+        "is_feasible": false,
+        "issues": [
+          "Event 1 missing required field: id",
+          "Event 1 missing required field: name",
+          "Event 1 missing required field: description",
+          "Event 1 missing required field: start_time",
+          "Event 1 missing required field: end_time",
+          "Event 1 missing required field: venue_name",
+          "Event 2 missing required field: id",
+          "Event 2 missing required field: name",
+          "Event 2 missing required field: description",
+          "Event 2 missing required field: start_time",
+          "Event 2 missing required field: end_time",
+          "Event 2 missing required field: venue_name",
+          "Event 3 missing required field: id",
+          "Event 3 missing required field: name",
+          "Event 3 missing required field: description",
+          "Event 3 missing required field: start_time",
+          "Event 3 missing required field: end_time",
+          "Event 3 missing required field: venue_name",
+          "Event 4 missing required field: id",
+          "Event 4 missing required field: name",
+          "Event 4 missing required field: description",
+          "Event 4 missing required field: start_time",
+          "Event 4 missing required field: end_time",
+          "Event 4 missing required field: venue_name",
+          "Event 5 missing required field: id",
+          "Event 5 missing required field: name",
+          "Event 5 missing required field: description",
+          "Event 5 missing required field: start_time",
+          "Event 5 missing required field: end_time",
+          "Event 5 missing required field: venue_name",
+          "Venue 1 missing required field: name",
+          "Venue 1 missing required field: address",
+          "Venue 1 missing required field: latitude",
+          "Venue 1 missing required field: longitude",
+          "Venue 2 missing required field: name",
+          "Venue 2 missing required field: address",
+          "Venue 2 missing required field: latitude",
+          "Venue 2 missing required field: longitude",
+          "Venue 3 missing required field: name",
+          "Venue 3 missing required field: address",
+          "Venue 3 missing required field: latitude",
+          "Venue 3 missing required field: longitude",
+          "Venue 4 missing required field: name",
+          "Venue 4 missing required field: address",
+          "Venue 4 missing required field: latitude",
+          "Venue 4 missing required field: longitude",
+          "Venue 5 missing required field: name",
+          "Venue 5 missing required field: address",
+          "Venue 5 missing required field: latitude",
+          "Venue 5 missing required field: longitude"
+        ]
+      }
+    }
+  },
+  "using_mock_data": false
+}

@@ -1,0 +1,26 @@
+{
+  "route_name": "Custom Manhattan Tour",
+  "distance": 3,
+  "transportation_modes": ["Walk", "Public Transport"],
+  "theme": "Historical Events",
+  "budget": 150,
+  "requirements": [
+    "Include at least one museum",
+    "Include at least one outdoor activity",
+    "Include lunch at a historical restaurant"
+  ],
+  "preferences": {
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "max_walking_distance": 2,
+    "accessibility": "wheelchair accessible"
+  },
+  "location": {
+    "city": "New York",
+    "neighborhood": "Manhattan",
+    "coordinates": {
+      "latitude": 40.7831,
+      "longitude": -73.9712
+    }
+  }
+} 

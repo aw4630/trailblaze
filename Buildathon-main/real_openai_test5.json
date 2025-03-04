@@ -1,0 +1,104 @@
+{
+  "itinerary": {
+    "name": "NYC Art & Food Tour",
+    "description": "Explore the rich art scene and diverse cuisine of Manhattan on this 3-mile walking and subway tour.",
+    "events": [],
+    "venues": [
+      {
+        "name": "The Metropolitan Museum of Art",
+        "type": "Art Museum",
+        "description": "Immerse yourself in world-class art collections spanning over 5,000 years of history.",
+        "location": "1000 5th Ave, New York, NY 10028"
+      },
+      {
+        "name": "Whitney Museum of American Art",
+        "type": "Art Museum",
+        "description": "Discover contemporary American art through innovative exhibitions and programs.",
+        "location": "99 Gansevoort St, New York, NY 10014"
+      },
+      {
+        "name": "Gagosian Gallery",
+        "type": "Art Gallery",
+        "description": "Experience cutting-edge contemporary art in a chic gallery setting.",
+        "location": "555 W 24th St, New York, NY 10011"
+      },
+      {
+        "name": "Le Bernardin",
+        "type": "Restaurant",
+        "description": "Indulge in exquisite French seafood dishes at this Michelin-starred restaurant.",
+        "location": "155 W 51st St, New York, NY 10019"
+      },
+      {
+        "name": "Katz's Delicatessen",
+        "type": "Restaurant",
+        "description": "Savor iconic New York deli sandwiches at this legendary establishment.",
+        "location": "205 E Houston St, New York, NY 10002"
+      }
+    ],
+    "routes": [
+      {
+        "start": "Your hotel in Manhattan",
+        "end": "The Metropolitan Museum of Art",
+        "transportation": "Walk",
+        "distance": "1 mile",
+        "directions": "Head south on 5th Ave"
+      },
+      {
+        "start": "The Metropolitan Museum of Art",
+        "end": "Whitney Museum of American Art",
+        "transportation": "Subway",
+        "distance": "3 miles",
+        "directions": "Take the downtown A train to 14th St"
+      },
+      {
+        "start": "Whitney Museum of American Art",
+        "end": "Gagosian Gallery",
+        "transportation": "Walk",
+        "distance": "0.5 mile",
+        "directions": "Walk west on Gansevoort St"
+      },
+      {
+        "start": "Gagosian Gallery",
+        "end": "Le Bernardin",
+        "transportation": "Walk",
+        "distance": "0.7 mile",
+        "directions": "Walk east on W 24th St, then north on 7th Ave"
+      },
+      {
+        "start": "Le Bernardin",
+        "end": "Katz's Delicatessen",
+        "transportation": "Subway",
+        "distance": "3 miles",
+        "directions": "Take the downtown E train to 2nd Ave"
+      }
+    ]
+  },
+  "verification": {
+    "is_feasible": true,
+    "total_issues": 0,
+    "all_issues": [],
+    "details": {
+      "venue_hours": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "travel_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "activity_durations": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "buffer_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "overall_timing": {
+        "is_feasible": true,
+        "issues": []
+      }
+    }
+  },
+  "using_mock_data": false
+}

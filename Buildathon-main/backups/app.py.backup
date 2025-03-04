@@ -1,0 +1,1163 @@
+from flask import Flask, request, jsonify, render_template, session
+from flask_cors import CORS
+import json
+import os
+import logging
+from typing import Dict, Any, List, Optional
+from datetime import datetime
+import traceback
+import sys
+import flask
+
+# Import models
+from models.user import UserContext, UserProfile, UserLocation, UserPreferences
+from models.event import Event, EventSchedule
+from models.navigation import NavigationPlan
+
+# Import services
+from services.openai_service import OpenAIService, DateTimeEncoder
+from services.google_maps_service import GoogleMapsService
+from services.google_showtimes_service import GoogleShowtimesService
+from services.plan_verification import PlanVerifier
+
+# Import embedding processor
+from models.embedding import EmbeddingProcessor
+
+# Import utilities
+from utils.helpers import parse_time_string, extract_budget, format_duration, format_distance
+
+# Import configuration
+import config
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)
+app.secret_key = os.urandom(24)
+
+# Initialize services
+openai_service = None
+maps_service = None
+showtimes_service = None
+embedding_processor = None
+plan_verifier = None
+
+try:
+    openai_service = OpenAIService()
+    logger.info("OpenAI service initialized successfully")
+except Exception as e:
+    error_traceback = traceback.format_exc()
+    logger.error(f"Failed to initialize OpenAI service: {str(e)}")
+    logger.error(f"Traceback: {error_traceback}")
+    logger.error(f"API Key configured: {'Yes' if config.OPENAI_API_KEY else 'No'}")
+
+try:
+    maps_service = GoogleMapsService()
+    logger.info("Google Maps service initialized successfully")
+except Exception as e:
+    error_traceback = traceback.format_exc()
+    logger.error(f"Failed to initialize Google Maps service: {str(e)}")
+    logger.error(f"Traceback: {error_traceback}")
+    logger.error(f"API Key configured: {'Yes' if config.GOOGLE_MAPS_API_KEY else 'No'}")
+
+try:
+    showtimes_service = GoogleShowtimesService()
+    logger.info("Google Showtimes service initialized successfully")
+except Exception as e:
+    error_traceback = traceback.format_exc()
+    logger.error(f"Failed to initialize Google Showtimes service: {str(e)}")
+    logger.error(f"Traceback: {error_traceback}")
+    logger.error(f"API Key configured: {'Yes' if config.GOOGLE_SHOWTIMES_API_KEY else 'No'}")
+
+try:
+    embedding_processor = EmbeddingProcessor()
+    logger.info("Embedding processor initialized successfully")
+except Exception as e:
+    error_traceback = traceback.format_exc()
+    logger.error(f"Failed to initialize Embedding processor: {str(e)}")
+    logger.error(f"Traceback: {error_traceback}")
+
+# Initialize Plan Verifier if dependencies are available
+if maps_service and showtimes_service:
+    try:
+        plan_verifier = PlanVerifier(maps_service, showtimes_service)
+        logger.info("Plan verifier initialized successfully")
+    except Exception as e:
+        error_traceback = traceback.format_exc()
+        logger.error(f"Failed to initialize Plan verifier: {str(e)}")
+        logger.error(f"Traceback: {error_traceback}")
+
+
+@app.route('/')
+def index():
+    """Render the main page."""
+    # Check if services are available
+    services_status = {
+        "openai": openai_service is not None,
+        "maps": maps_service is not None,
+        "showtimes": showtimes_service is not None,
+        "embedding": embedding_processor is not None
+    }
+    
+    if not all(services_status.values()):
+        logger.warning(f"Some services are unavailable: {services_status}")
+    
+    return render_template('index.html')
+
+
+@app.route('/ai-planner')
+def ai_planner():
+    """Render the AI-driven planner page."""
+    return render_template('ai_planner.html')
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """Process a chat message and return a response."""
+    try:
+        data = request.json
+        user_message = data.get('message', '')
+        
+        logger.info(f"Received message: '{user_message}'")
+        
+        # Check if services are available with detailed logging
+        if not openai_service:
+            logger.error("OpenAI service is unavailable - returning 503")
+            return jsonify({
+                'response': "I'm sorry, but the AI service is currently unavailable. Please check your API configuration.",
+                'error': "OpenAI service unavailable",
+                'details': "The OpenAI service failed to initialize. Check the logs for more information."
+            }), 503
+            
+        if not showtimes_service:
+            logger.error("Showtimes service is unavailable - returning 503")
+            return jsonify({
+                'response': "I'm sorry, but I can't search for events right now. Please check your Google Places API configuration.",
+                'error': "Showtimes service unavailable",
+                'details': "The Google Places API service failed to initialize. This may be due to a missing or invalid API key."
+            }), 503
+        
+        # Get or create user context
+        user_context = get_or_create_user_context()
+        
+        # Process the user message to extract structured information
+        logger.info(f"Processing user message to extract structured data")
+        extracted_data = openai_service.process_user_query(user_message)
+        logger.info(f"Extracted data from user query: {extracted_data}")
+        
+        # Update user context with extracted data
+        user_context = update_user_context(user_context, extracted_data)
+        
+        # Check if we have enough information to search for events
+        has_event_info = False
+        
+        # Check if event theme is in the message directly
+        if user_message and any(keyword in user_message.lower() for keyword in ['movie', 'show', 'theatre', 'theater', 'gallery', 'museum', 'concert', 'broadway']):
+            logger.info(f"Found event keywords directly in message")
+            if not user_context.preferences.event_theme:
+                logger.info(f"Setting event theme from message: {user_message}")
+                user_context.preferences.event_theme = user_message
+                has_event_info = True
+        
+        # If we extracted an event theme, update the user context
+        if "event_theme" in extracted_data and extracted_data["event_theme"]:
+            user_context.preferences.event_theme = extracted_data["event_theme"]
+            update_user_context(user_context, {})
+            logger.info(f"Updated user context with event theme: {user_context.preferences.event_theme}")
+            has_event_info = True
+        
+        # If we have event information, search for events
+        if user_context.preferences.event_theme:
+            logger.info(f"Searching for events with theme: '{user_context.preferences.event_theme}'")
+            
+            try:
+                # First, get all places matching the query (unfiltered)
+                all_places = showtimes_service.get_all_matching_places(
+                    query=user_context.preferences.event_theme,
+                    location=(
+                        user_context.profile.location.latitude,
+                        user_context.profile.location.longitude
+                    ) if user_context.profile.location else None
+                )
+                
+                # Then search for events based on user preferences (filtered)
+                events = search_events_for_user(user_context)
+                
+                # Create a response with two parts:
+                # 1. A list of all matching places
+                # 2. Specific events with showtimes that are available now
+                
+                # Create openai prompt with the full context
+                response_prompt = f"""
+                The user asked: "{user_message}"
+                
+                I found {len(all_places)} places matching "{user_context.preferences.event_theme}" in total.
+                
+                Here are all the places I found:
+                {json.dumps([{
+                    'name': place.get('name', 'Unknown'),
+                    'address': place.get('formatted_address', place.get('vicinity', 'Unknown')),
+                    'rating': place.get('rating', 'No rating'),
+                    'types': place.get('types', []),
+                    'business_status': place.get('business_status', 'Unknown')
+                } for place in all_places], indent=2)}
+                
+                Of these places, I found {len(events)} with available showtimes:
+                {json.dumps([event.to_dict() for event in events], cls=DateTimeEncoder, indent=2) if events else "None"}
+                
+                The user's timezone appears to be different from the venue timezone. 
+                The venues are most likely in {user_context.profile.location.address if user_context.profile.location else 'an unknown location'}.
+                
+                Craft a helpful, conversational response addressing the following aspects:
+                1. Brief acknowledgment of what they're looking for.
+                2. Mention how many places you found in total.
+                3. If there are venues with available showtimes, specifically recommend these and provide details about showtimes.
+                4. If most venues are closed right now, mention this fact and suggest trying at a different time or checking venue websites directly.
+                5. Include at least 2-3 specific venue names that best match their query.
+                
+                Make your response friendly and conversational, and reference specifics from the data provided.
+                """
+                
+                # Generate response from OpenAI
+                response_text = openai_service.generate_response(response_prompt)
+                
+                # Prepare the response data
+                response_data = {
+                    'all_places': [{
+                        'name': place.get('name', 'Unknown'),
+                        'address': place.get('formatted_address', place.get('vicinity', 'Unknown')),
+                        'rating': place.get('rating', 'No rating'),
+                        'types': place.get('types', []),
+                        'business_status': place.get('business_status', 'Unknown')
+                    } for place in all_places],
+                    'response': response_text
+                }
+                
+                # If we have events with showtimes, add them to the response
+                if events:
+                    # Create a schedule with the found events
+                    schedule = create_event_schedule(events, user_context)
+                    
+                    # Validate the schedule against user preferences
+                    validation_result = validate_schedule(schedule, user_context)
+                    
+                    # Add events and schedule to the response
+                    response_data['events'] = [event.to_dict() for event in schedule.events]
+                    response_data['validation'] = validation_result
+                    
+                    # Add navigation plan if available
+                    if schedule.navigation_plan:
+                        response_data['navigation_plan'] = schedule.navigation_plan.to_dict()
+                
+                return jsonify(response_data)
+                
+            except ValueError as ve:
+                # Handle specific value errors which could be due to API configuration issues
+                logger.error(f"Value error in event search: {str(ve)}")
+                error_message = str(ve)
+                
+                # Even when we have errors, try to provide some helpful information
+                if all_places:
+                    # Create a openai prompt for error scenario with places data
+                    error_prompt = f"""
+                    The user asked: "{user_message}"
+                    
+                    I found {len(all_places)} places matching "{user_context.preferences.event_theme}", but I couldn't get showtime information for any of them.
+                    
+                    Here are some of the places I found:
+                    {json.dumps([{
+                        'name': place.get('name', 'Unknown'),
+                        'address': place.get('formatted_address', place.get('vicinity', 'Unknown')),
+                        'rating': place.get('rating', 'No rating')
+                    } for place in all_places[:5]], indent=2)}
+                    
+                    The error message was: "{error_message}"
+                    
+                    Craft a helpful, conversational response that:
+                    1. Acknowledges what the user is looking for
+                    2. Explains that while I found places matching their search, I couldn't retrieve showtime information
+                    3. Mentions a few specific venues they might want to check out directly
+                    4. Suggests that they may want to check venue websites or contact them directly for current showtimes
+                    
+                    Make your response friendly and conversational.
+                    """
+                    
+                    # Generate response from OpenAI for the error scenario
+                    error_response = openai_service.generate_response(error_prompt)
+                    
+                    return jsonify({
+                        'response': error_response,
+                        'all_places': [{
+                            'name': place.get('name', 'Unknown'),
+                            'address': place.get('formatted_address', place.get('vicinity', 'Unknown')),
+                            'rating': place.get('rating', 'No rating')
+                        } for place in all_places[:10]],  # Return up to 10 places
+                        'error': 'showtime_data_unavailable'
+                    }), 200  # Still return 200 because we have some data
+                
+                elif "API key" in error_message or "REQUEST_DENIED" in error_message:
+                    return jsonify({
+                        'response': (
+                            "I'm unable to search for events right now due to an API authorization issue. "
+                            "Please verify your Google Places API key is valid and has the appropriate permissions. "
+                            "If you're testing the application, you may need to enable mock data in the configuration."
+                        ),
+                        'error': 'api_key_error'
+                    }), 401
+                elif "mock data is disabled" in error_message:
+                    return jsonify({
+                        'response': (
+                            "I couldn't find any real-time event data, and mock data is currently disabled. "
+                            "This could be because venues are closed, or no data matches your search criteria. "
+                            "You can try a different search term, or check the application's configuration."
+                        ),
+                        'error': 'mock_data_disabled'
+                    }), 404
+                else:
+                    return jsonify({
+                        'response': f"I encountered an error while searching for events: {error_message}. Please try a different search or check your API configuration.",
+                        'error': 'event_search_error'
+                    }), 400
+            except Exception as e:
+                logger.error(f"Error searching for events: {str(e)}")
+                return jsonify({
+                    'response': f"I encountered an error while searching for events: {str(e)}. Please try a different search or check your API configuration.",
+                    'error': 'event_search_error'
+                }), 500
+        else:
+            # Not enough information, ask for more details
+            logger.info("Not enough information provided to search for events")
+            return jsonify({
+                'response': "I'd be happy to help you find events! Could you tell me what kind of events you're interested in? For example, movies, art galleries, or Broadway shows?"
+            })
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {str(e)}")
+        return jsonify({
+            'response': "I'm sorry, but I encountered an error while processing your request. Please try again.",
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/profile', methods=['POST'])
+def update_profile():
+    """Update user profile information."""
+    try:
+        data = request.json
+        logger.info(f"Updating user profile with data: {data}")
+        
+        # Initialize or get user context from session
+        if 'user_context' in session:
+            context_dict = json.loads(session['user_context'])
+            user_context = UserContext.model_validate(context_dict)
+        else:
+            user_context = UserContext()
+        
+        # Update profile information
+        if 'email' in data:
+            user_context.profile.email = data['email']
+            
+        if 'accessibility_needs' in data:
+            user_context.profile.accessibility_needs = data['accessibility_needs']
+            
+        if 'walking_capability' in data:
+            user_context.profile.walking_capability = data['walking_capability']
+            
+        # Update location if both latitude and longitude are provided
+        if 'latitude' in data and 'longitude' in data:
+            user_context.profile.location = UserLocation(
+                latitude=data['latitude'],
+                longitude=data['longitude'],
+                address=data.get('address')
+            )
+        
+        # Save updated context to session
+        session['user_context'] = json.dumps(user_context.model_dump())
+        logger.info(f"User profile updated successfully")
+        
+        return jsonify({'success': True, 'profile': user_context.profile.model_dump()})
+    except Exception as e:
+        logger.error(f"Error updating profile: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/preferences', methods=['POST'])
+def update_preferences():
+    """Update user preferences."""
+    try:
+        data = request.json
+        logger.info(f"Updating user preferences with data: {data}")
+        
+        # Initialize or get user context from session
+        user_context = get_or_create_user_context()
+        
+        # Update preferences
+        if 'event_theme' in data:
+            user_context.preferences.event_theme = data['event_theme']
+            
+        if 'available_time_start' in data:
+            user_context.preferences.available_time_start = data['available_time_start']
+            
+        if 'available_time_end' in data:
+            user_context.preferences.available_time_end = data['available_time_end']
+            
+        if 'budget' in data:
+            user_context.preferences.budget = data['budget']
+            
+        if 'transport_preferences' in data:
+            user_context.preferences.transport_preferences = data['transport_preferences']
+        
+        # Save updated context to session
+        update_user_context(user_context, {})
+        logger.info(f"User preferences updated successfully")
+        
+        return jsonify({'success': True, 'preferences': user_context.preferences.model_dump()})
+    except Exception as e:
+        logger.error(f"Error updating preferences: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/preferences', methods=['GET'])
+def get_preferences():
+    """Get user preferences."""
+    try:
+        if 'user_context' in session:
+            context_dict = json.loads(session['user_context'])
+            user_context = UserContext.model_validate(context_dict)
+            return jsonify({'success': True, 'preferences': user_context.preferences.model_dump()})
+        else:
+            logger.warning("No user context found in session")
+            return jsonify({'success': False, 'error': 'No user context found'}), 404
+    except Exception as e:
+        logger.error(f"Error getting preferences: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@app.route('/api/service-status', methods=['GET'])
+def service_status():
+    """Check if all services are available and properly configured."""
+    services = {
+        "openai": {
+            "available": openai_service is not None,
+            "key_configured": bool(config.OPENAI_API_KEY),
+            "key_status": "Valid" if openai_service else "Invalid or missing"
+        },
+        "maps": {
+            "available": maps_service is not None,
+            "key_configured": bool(config.GOOGLE_MAPS_API_KEY),
+            "key_status": "Valid" if maps_service else "Invalid or missing"
+        },
+        "showtimes": {
+            "available": showtimes_service is not None,
+            "key_configured": bool(config.GOOGLE_SHOWTIMES_API_KEY),
+            "key_status": "Valid" if showtimes_service else "Invalid or missing",
+            "using_mock_data": getattr(showtimes_service, '_using_mock_data', False) if showtimes_service else False,
+            "mock_data_enabled": False
+        },
+        "embedding": {
+            "available": embedding_processor is not None
+        }
+    }
+    
+    # Check if Claude is also available (for backwards compatibility)
+    try:
+        from services.claude_service import ClaudeService
+        claude_available = bool(config.ANTHROPIC_API_KEY)
+        services["claude"] = {
+            "available": claude_available,
+            "key_configured": bool(config.ANTHROPIC_API_KEY),
+            "key_status": "Available but not used" if claude_available else "Not available"
+        }
+    except ImportError:
+        services["claude"] = {
+            "available": False,
+            "key_configured": False,
+            "key_status": "Module not found" 
+        }
+    
+    # Required services for operation (OpenAI and maps)
+    required_services = ["openai", "maps", "showtimes"]
+    all_available = all(services[service]["available"] for service in required_services)
+    
+    # Add application info
+    app_info = {
+        "mock_data_enabled": config.USE_MOCK_DATA,
+        "debug_mode": config.DEBUG,
+        "openai_model": config.OPENAI_MODEL,
+        "ai_service_in_use": "openai"
+    }
+    
+    return jsonify({
+        "services": services,
+        "all_available": all_available,
+        "app_info": app_info
+    })
+
+
+@app.route('/api/debug', methods=['GET'])
+def debug_info():
+    """Get debug information about the application state and configuration."""
+    # Only allow in debug mode
+    if not config.DEBUG:
+        return jsonify({
+            'error': 'Debug endpoint is only available when DEBUG=True'
+        }), 403
+        
+    # Collect environment info
+    env_info = {
+        'python_version': '.'.join(map(str, sys.version_info[:3])),
+        'platform': sys.platform,
+        'flask_version': flask.__version__
+    }
+    
+    # API key status (show first and last 4 chars for verification)
+    api_keys = {
+        'OPENAI_API_KEY': mask_api_key(config.OPENAI_API_KEY),
+        'GOOGLE_MAPS_API_KEY': mask_api_key(config.GOOGLE_MAPS_API_KEY),
+        'GOOGLE_SHOWTIMES_API_KEY': mask_api_key(config.GOOGLE_SHOWTIMES_API_KEY)
+    }
+    
+    # Service initialization status
+    services_status = {
+        'openai_service': openai_service is not None,
+        'maps_service': maps_service is not None,
+        'showtimes_service': showtimes_service is not None,
+        'embedding_processor': embedding_processor is not None
+    }
+    
+    # Application configuration
+    app_config = {
+        'DEBUG': config.DEBUG,
+        'USE_MOCK_DATA': config.USE_MOCK_DATA,
+        'OPENAI_MODEL': config.OPENAI_MODEL,
+        'PORT': config.PORT,
+        'HOST': config.HOST
+    }
+    
+    return jsonify({
+        'env_info': env_info,
+        'api_keys': api_keys,
+        'services_status': services_status,
+        'app_config': app_config
+    })
+    
+def mask_api_key(key):
+    """Mask API key to show only first and last 4 chars for verification."""
+    if not key:
+        return "Not configured"
+        
+    if len(key) <= 8:
+        return "***" # Key too short to mask properly
+        
+    return f"{key[:4]}...{key[-4:]}"
+
+
+def get_or_create_user_context() -> UserContext:
+    """Get existing user context from session or create a new one."""
+    if 'user_context' in session:
+        context_dict = json.loads(session['user_context'])
+        user_context = UserContext.model_validate(context_dict)
+        logger.debug("Retrieved existing user context from session")
+    else:
+        user_context = UserContext()
+        logger.info("Created new user context")
+    
+    return user_context
+
+
+def update_user_context(user_context, extracted_data):
+    """Update user context with extracted data from user message."""
+    user_context.update_from_chat(extracted_data)
+    session['user_context'] = json.dumps(user_context.model_dump())
+    logger.debug("Updated user context in session")
+    return user_context
+
+
+def search_events_for_user(user_context: UserContext) -> List[Event]:
+    """Search for events based on user preferences."""
+    events = []
+    
+    # Get user location if available
+    location = None
+    if user_context.profile.location:
+        location = (
+            user_context.profile.location.latitude,
+            user_context.profile.location.longitude
+        )
+        logger.info(f"Using user location: {location}")
+    else:
+        logger.info("No user location available, searching without location")
+    
+    # Search for events based on theme
+    event_theme = user_context.preferences.event_theme
+    if event_theme:
+        logger.info(f"Searching for events with theme: '{event_theme}'")
+        
+        # If the theme contains multiple event types, try to split and search for each
+        if "," in event_theme:
+            all_events = []
+            themes = [theme.strip() for theme in event_theme.split(",")]
+            logger.info(f"Split event theme into: {themes}")
+            
+            theme_errors = []
+            for theme in themes:
+                logger.info(f"Searching for individual theme: '{theme}'")
+                try:
+                    theme_events = showtimes_service.search_events(
+                        query=theme,
+                        location=location
+                    )
+                    logger.info(f"Found {len(theme_events)} events for theme '{theme}'")
+                    all_events.extend(theme_events)
+                except Exception as e:
+                    logger.error(f"Error searching for theme '{theme}': {str(e)}")
+                    theme_errors.append(f"{theme}: {str(e)}")
+            
+            # If we have errors for all themes and no events, raise an exception
+            if theme_errors and not all_events:
+                error_message = "No events found for any themes. Errors: " + "; ".join(theme_errors)
+                logger.error(error_message)
+                if not config.USE_MOCK_DATA:
+                    raise ValueError(error_message)
+            
+            # Remove duplicates if any
+            seen_ids = set()
+            events = []
+            for event in all_events:
+                if event.id not in seen_ids:
+                    seen_ids.add(event.id)
+                    events.append(event)
+            
+            logger.info(f"Total combined events after removing duplicates: {len(events)}")
+        else:
+            events = showtimes_service.search_events(
+                query=event_theme,
+                location=location
+            )
+            logger.info(f"Found {len(events)} events for theme '{event_theme}'")
+    else:
+        logger.warning("No event theme available to search for events")
+    
+    return events
+
+
+def create_event_schedule(events: List[Event], user_context: UserContext) -> EventSchedule:
+    """Create an event schedule based on user preferences."""
+    schedule = EventSchedule()
+    
+    # Sort events by rating (if available)
+    sorted_events = sorted(
+        events,
+        key=lambda e: e.rating if e.rating is not None else 0,
+        reverse=True
+    )
+    
+    # For Broadway shows, we want to optimize for:
+    # 1. Showtimes that don't overlap
+    # 2. Minimize travel distance between venues
+    # 3. Higher-rated shows
+    
+    # Check if this is a Broadway search
+    is_broadway_search = user_context.preferences.event_theme and 'broadway' in user_context.preferences.event_theme.lower()
+    
+    if is_broadway_search:
+        logger.info("Broadway search detected - creating optimized Broadway route")
+        
+        # First, filter out events with no showtimes today
+        events_with_showtimes = []
+        current_time_utc = datetime.now()
+        
+        for event in sorted_events:
+            if not event.showtimes:
+                continue
+                
+            # Check if any showtimes are today (in venue's timezone)
+            has_today_showtimes = False
+            for showtime in event.showtimes:
+                if showtime.start_time.date() == current_time_utc.date():
+                    has_today_showtimes = True
+                    break
+                    
+            if has_today_showtimes:
+                events_with_showtimes.append(event)
+        
+        # Sort shows by start time
+        events_with_showtimes.sort(key=lambda e: e.showtimes[0].start_time if e.showtimes else datetime.max)
+        
+        # Take up to 5 events for Broadway itinerary
+        selected_events = events_with_showtimes[:5]
+        
+        # Add events to schedule
+        for event in selected_events:
+            schedule.add_event(event)
+            
+        logger.info(f"Created optimized Broadway schedule with {len(selected_events)} events")
+    else:
+        # Take top events (limit to 3 for non-Broadway searches)
+        top_events = sorted_events[:3]
+        logger.info(f"Selected top {len(top_events)} events for schedule")
+        
+        # Add events to schedule
+        for event in top_events:
+            schedule.add_event(event)
+    
+    # Calculate total duration including travel time
+    if maps_service and user_context.profile.location and len(schedule.events) > 0:
+        # Get preferred transport mode or default to walking for Broadway (usually close together)
+        transport_mode = "walking" if is_broadway_search else "driving"
+        if user_context.preferences.transport_preferences:
+            transport_mode = user_context.preferences.transport_preferences[0]
+        
+        # Create a list of locations starting with user's current location
+        locations = [(
+            user_context.profile.location.latitude,
+            user_context.profile.location.longitude
+        )]
+        
+        # Add event locations
+        for event in schedule.events:
+            locations.append((
+                event.location.latitude,
+                event.location.longitude
+            ))
+        
+        try:
+            # Create a navigation plan for all locations, with Broadway-specific handling if appropriate
+            navigation_plan = maps_service.create_navigation_plan(
+                locations, 
+                transport_mode,
+                is_broadway=is_broadway_search
+            )
+            
+            # Add the total travel time to the schedule
+            schedule.total_duration += navigation_plan.total_duration
+            
+            # Store the navigation plan in the schedule for later use
+            schedule.navigation_plan = navigation_plan
+            logger.info(f"Created navigation plan with {len(navigation_plan.routes)} routes")
+        except Exception as e:
+            logger.error(f"Error creating navigation plan: {str(e)}")
+            # Continue without navigation plan
+    else:
+        logger.info("Skipping navigation plan creation (no location data or maps service)")
+    
+    return schedule
+
+
+def validate_schedule(schedule: EventSchedule, user_context: UserContext) -> Dict[str, Any]:
+    """Validate the created schedule against user preferences."""
+    try:
+        # Prepare validation data
+        validation_data = {
+            "schedule": schedule.to_dict(),
+            "user_context": user_context.to_dict()
+        }
+        
+        # Validate using OpenAI
+        validation_result = openai_service.validate_event_data(
+            [event.to_dict() for event in schedule.events],
+            user_context.to_dict()
+        )
+        
+        logger.info(f"Schedule validation result: valid={validation_result.get('is_valid', False)}")
+        return validation_result
+    except Exception as e:
+        logger.error(f"Error validating schedule: {str(e)}")
+        # Return a default validation result if there's an error
+        return {
+            "is_valid": True,  # Assume valid to continue
+            "issues": [f"Could not validate schedule: {str(e)}"],
+            "suggestions": []
+        }
+
+
+def create_final_response(schedule: EventSchedule, user_context: UserContext, validation_result: Dict[str, Any]) -> str:
+    """Create a final response with the validated schedule."""
+    try:
+        # Check if this is a Broadway search
+        is_broadway_search = user_context.preferences.event_theme and 'broadway' in user_context.preferences.event_theme.lower()
+        
+        # Create a prompt for OpenAI
+        prompt = f"""
+        Create a friendly, conversational response for the user that includes:
+        
+        1. A summary of the events in their schedule
+        2. The total cost of the events: {schedule.total_cost}
+        3. The total duration including travel time: {format_duration(schedule.total_duration)}
+        """
+        
+        if is_broadway_search:
+            prompt += """
+        
+        This is a Broadway shows search. Please emphasize:
+        - These are TODAY'S available showtimes (not tomorrow)
+        - Highlight the specific showtimes for each show
+        - Suggest a logical order to see shows based on their start times
+        - Mention that Broadway theaters are generally within walking distance of each other
+        - Note if any show is particularly highly rated
+        """
+        
+        # Add navigation details if available
+        if hasattr(schedule, 'navigation_plan') and schedule.navigation_plan:
+            navigation_details = []
+            
+            for i, route in enumerate(schedule.navigation_plan.routes):
+                from_location = "your current location" if i == 0 else schedule.events[i-1].name
+                to_location = schedule.events[i].name
+                
+                navigation_details.append(
+                    f"- From {from_location} to {to_location}:\n"
+                    f"  - Distance: {format_distance(route.distance)}\n"
+                    f"  - Travel time: {format_duration(route.duration)}\n"
+                    f"  - Travel mode: {route.travel_mode.value}"
+                )
+            
+            prompt += f"""
+        
+        4. Navigation details:
+        {chr(10).join(navigation_details)}
+        """
+        
+        prompt += f"""
+        
+        User preferences:
+        {json.dumps(user_context.preferences.model_dump(exclude_none=True), indent=2)}
+        
+        Events in the schedule:
+        {json.dumps([event.to_dict() for event in schedule.events], cls=DateTimeEncoder, indent=2)}
+        
+        Make the response friendly and conversational, as if you're chatting with the user.
+        Include specific navigation instructions between locations.
+        """
+        
+        # Generate response from OpenAI
+        response = openai_service.generate_response(prompt)
+        
+        return response
+    except Exception as e:
+        logger.error(f"Error creating final response: {str(e)}")
+        # Return a simple response if there's an error
+        events_text = ", ".join([event.name for event in schedule.events])
+        return f"I found these events that might interest you: {events_text}. The total cost is ${schedule.total_cost:.2f}."
+
+
+@app.route('/api/route', methods=['POST'])
+def generate_route():
+    """
+    Generate a comprehensive route that combines venues, events, and navigation.
+    Returns a unified JSON structure for the UI to display an integrated experience.
+    """
+    try:
+        data = request.json
+        query = data.get('query', '')
+        transport_mode = data.get('transport_mode', 'walking')
+        
+        logger.info(f"Generating route for query: '{query}', transport mode: {transport_mode}")
+        
+        # Check if services are available
+        if not showtimes_service:
+            logger.error("Showtimes service is unavailable")
+            return jsonify({
+                'error': "Showtimes service unavailable",
+                'message': "The event search service is currently unavailable."
+            }), 503
+            
+        if not maps_service:
+            logger.error("Maps service is unavailable")
+            return jsonify({
+                'error': "Maps service unavailable",
+                'message': "The routing service is currently unavailable."
+            }), 503
+        
+        # Get or create user context
+        user_context = get_or_create_user_context()
+        
+        # Update user context with the query
+        user_context.preferences.event_theme = query
+        update_user_context(user_context, {})
+        
+        # Set transport preferences
+        user_context.preferences.transport_preferences = [transport_mode]
+        
+        # Detect if this is a Broadway search
+        is_broadway = 'broadway' in query.lower()
+        
+        # Search for events
+        logger.info(f"Searching for events with query: '{query}'")
+        events = search_events_for_user(user_context)
+        
+        if not events:
+            logger.warning(f"No events found for query: '{query}'")
+            return jsonify({
+                'error': "No events found",
+                'message': f"No events were found matching '{query}'.",
+                'query': query
+            }), 404
+        
+        logger.info(f"Found {len(events)} events")
+        
+        # Create an event schedule based on the events
+        schedule = create_event_schedule(events, user_context)
+        
+        # Build the unified route response
+        route_data = {
+            'query': query,
+            'is_broadway': is_broadway,
+            'transport_mode': transport_mode,
+            'events': [event.to_dict() for event in schedule.events],
+            'total_duration': schedule.total_duration,
+            'total_cost': schedule.total_cost
+        }
+        
+        # Add navigation data if available
+        if hasattr(schedule, 'navigation_plan') and schedule.navigation_plan:
+            route_data['navigation'] = {
+                'total_distance': schedule.navigation_plan.total_distance,
+                'total_travel_time': schedule.navigation_plan.total_duration,
+                'routes': []
+            }
+            
+            # Add each route segment
+            for i, route in enumerate(schedule.navigation_plan.routes):
+                from_location = "Current Location" if i == 0 else schedule.events[i-1].name
+                to_location = schedule.events[i].name
+                
+                route_segment = {
+                    'from': {
+                        'name': from_location,
+                        'location': route.origin
+                    },
+                    'to': {
+                        'name': to_location,
+                        'location': route.destination
+                    },
+                    'distance': route.distance,
+                    'duration': route.duration,
+                    'travel_mode': route.travel_mode.value,
+                    'polyline': route.polyline,
+                    'steps': [step.model_dump() for step in route.steps]
+                }
+                
+                route_data['navigation']['routes'].append(route_segment)
+        
+        logger.info(f"Successfully generated unified route response with {len(schedule.events)} events")
+        return jsonify(route_data)
+        
+    except Exception as e:
+        logger.error(f"Error generating route: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'message': "An error occurred while generating your route."
+        }), 500
+
+
+@app.route('/api/plan', methods=['POST'])
+def create_plan():
+    """
+    Create a complete plan using OpenAI with web searching capability,
+    verified and refined using Google APIs.
+    
+    This implements a loop:
+    1. OpenAI creates initial plan
+    2. Google APIs verify the plan
+    3. If issues found, OpenAI refines the plan
+    4. Repeat until perfect (or max iterations reached)
+    
+    Returns a unified JSON with venues, events, and routes
+    """
+    try:
+        data = request.json
+        query = data.get('query', '')
+        transport_mode = data.get('transport_mode', 'walking')
+        max_iterations = int(data.get('max_iterations', 3))
+        
+        logger.info(f"Creating AI-driven plan for query: '{query}', transport mode: {transport_mode}")
+        
+        # Validate required services
+        if not openai_service:
+            logger.error("OpenAI service is unavailable")
+            return jsonify({
+                'error': "OpenAI service unavailable",
+                'message': "The AI planning service is currently unavailable."
+            }), 503
+            
+        if not plan_verifier:
+            logger.error("Plan verification service is unavailable")
+            return jsonify({
+                'error': "Plan verification service unavailable",
+                'message': "The plan verification service is currently unavailable."
+            }), 503
+        
+        # Get or create user context
+        user_context = get_or_create_user_context()
+        
+        # Update user context with query and transport preferences
+        user_context.preferences.event_theme = query
+        user_context.preferences.transport_preferences = [transport_mode]
+        update_user_context(user_context, {})
+        
+        # Step 1: Generate the initial plan using OpenAI
+        logger.info(f"Generating initial plan with OpenAI for query: '{query}'")
+        initial_plan = openai_service.create_initial_plan(query, user_context.to_dict())
+        
+        # Check for errors in the initial plan
+        if 'error' in initial_plan:
+            logger.error(f"Error generating initial plan: {initial_plan['error']}")
+            return jsonify({
+                'error': "Failed to generate initial plan",
+                'message': initial_plan['error']
+            }), 500
+        
+        # Step 2: Verify and refine the plan
+        current_plan = initial_plan
+        current_iteration = 0
+        final_plan = None
+        
+        while current_iteration < max_iterations:
+            current_iteration += 1
+            logger.info(f"Verification iteration {current_iteration}/{max_iterations}")
+            
+            # Verify the current plan
+            verified_plan = plan_verifier.verify_plan(current_plan)
+            
+            # Check for verification errors
+            if 'error' in verified_plan and 'original_plan' in verified_plan:
+                logger.error(f"Error during plan verification: {verified_plan['error']}")
+                # Return the original plan with error information
+                final_plan = verified_plan['original_plan']
+                final_plan['verification_error'] = verified_plan['error']
+                break
+            
+            # Check if the plan has issues
+            if verified_plan.get('verification', {}).get('has_issues', False):
+                issues = verified_plan.get('verification', {}).get('issues', [])
+                logger.info(f"Plan has {len(issues)} issues, refining with OpenAI")
+                
+                # Refine the plan using OpenAI
+                refined_plan = openai_service.refine_plan(current_plan, verified_plan)
+                
+                # Check for errors in refinement
+                if 'error' in refined_plan:
+                    logger.error(f"Error refining plan: {refined_plan['error']}")
+                    # Use the verified plan despite issues
+                    final_plan = verified_plan
+                    break
+                
+                # Update current plan for next iteration
+                current_plan = refined_plan
+            else:
+                # No issues, plan is good
+                logger.info("Plan verification successful with no issues")
+                final_plan = verified_plan
+                break
+        
+        # If we hit max iterations without resolving all issues
+        if not final_plan:
+            logger.warning(f"Reached maximum iterations ({max_iterations}) without resolving all issues")
+            final_plan = verified_plan
+        
+        # Format the response
+        response_data = final_plan.copy()
+        
+        # Add metadata
+        response_data['query'] = query
+        response_data['transport_mode'] = transport_mode
+        response_data['iterations'] = current_iteration
+        response_data['timestamp'] = datetime.now().isoformat()
+        
+        # Generate a text summary using OpenAI
+        try:
+            plan_summary = generate_plan_summary(final_plan, query, transport_mode)
+            response_data['summary'] = plan_summary
+        except Exception as e:
+            logger.error(f"Error generating plan summary: {str(e)}")
+            response_data['summary'] = f"Plan for {query} with {len(final_plan.get('events', []))} events and {len(final_plan.get('venues', []))} venues"
+        
+        logger.info(f"Successfully created plan with {len(final_plan.get('venues', []))} venues and {len(final_plan.get('events', []))} events")
+        return jsonify(response_data)
+        
+    except Exception as e:
+        error_traceback = traceback.format_exc()
+        logger.error(f"Error creating plan: {str(e)}")
+        logger.error(f"Traceback: {error_traceback}")
+        return jsonify({
+            'error': str(e),
+            'message': "An error occurred while creating your plan."
+        }), 500
+
+
+def generate_plan_summary(plan: Dict[str, Any], query: str, transport_mode: str) -> str:
+    """Generate a text summary of the plan using OpenAI."""
+    if not openai_service:
+        return f"Plan for {query} using {transport_mode}"
+    
+    try:
+        # Create a summary prompt
+        venues_str = "\n".join([f"- {v.get('name')}: {v.get('address')}" for v in plan.get('venues', [])])
+        
+        events_str = ""
+        for e in plan.get('events', []):
+            start_time = e.get('start_time', 'Unknown time')
+            if isinstance(start_time, str):
+                try:
+                    dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+                    start_time = dt.strftime("%I:%M %p")
+                except ValueError:
+                    pass
+            
+            events_str += f"- {e.get('name')} at {e.get('venue_name')} ({start_time}): ${e.get('price', 'N/A')}\n"
+        
+        routes_str = "\n".join([
+            f"- From {r.get('from')} to {r.get('to')}: {format_distance(r.get('distance_meters', 0))}, {format_duration(r.get('duration_seconds', 0))}"
+            for r in plan.get('routes', [])
+        ])
+        
+        total_cost = plan.get('total_cost', 0)
+        total_duration = plan.get('total_duration_hours', 0)
+        
+        prompt = f"""
+        Create a concise but friendly summary of this plan for the user query: "{query}"
+        
+        Venues:
+        {venues_str}
+        
+        Events:
+        {events_str}
+        
+        Routes (using {transport_mode}):
+        {routes_str}
+        
+        Total Cost: ${total_cost}
+        Total Duration: {total_duration} hours
+        
+        Keep it conversational and highlight the most interesting aspects of the plan.
+        Include specific information about starting times, locations, and any transit recommendations.
+        Limit your response to 3-4 paragraphs maximum.
+        """
+        
+        # Generate the summary
+        summary = openai_service.generate_response(prompt)
+        return summary
+    
+    except Exception as e:
+        logger.error(f"Error generating plan summary: {str(e)}")
+        return f"Plan for {query} with {len(plan.get('events', []))} events"
+
+
+if __name__ == '__main__':
+    # Check for required API keys and warn if missing
+    required_keys = {
+        "OPENAI_API_KEY": config.OPENAI_API_KEY,
+        "GOOGLE_MAPS_API_KEY": config.GOOGLE_MAPS_API_KEY,
+        "GOOGLE_SHOWTIMES_API_KEY": config.GOOGLE_SHOWTIMES_API_KEY
+    }
+    
+    missing_keys = [key for key, value in required_keys.items() if not value]
+    
+    if missing_keys:
+        logger.warning(f"The following API keys are missing: {', '.join(missing_keys)}")
+        logger.warning("Some features may not work correctly without these keys.")
+    
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG) 

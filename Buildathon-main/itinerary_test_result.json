@@ -1,0 +1,159 @@
+{
+  "itinerary": {
+    "name": "NYC Landmarks Adventure",
+    "description": "A journey through iconic New York City landmarks",
+    "events": [
+      {
+        "id": "event1",
+        "name": "Empire State Building",
+        "description": "Visit the iconic Empire State Building observation deck",
+        "start_time": "2023-08-15T10:00:00",
+        "end_time": "2023-08-15T11:30:00",
+        "venue_name": "Empire State Building",
+        "cost": 45.0
+      },
+      {
+        "id": "event2",
+        "name": "Times Square Exploration",
+        "description": "Explore the vibrant Times Square area",
+        "start_time": "2023-08-15T12:00:00",
+        "end_time": "2023-08-15T13:00:00",
+        "venue_name": "Times Square",
+        "cost": 0.0
+      },
+      {
+        "id": "event3",
+        "name": "Lunch at Bubba Gump",
+        "description": "Enjoy seafood at Bubba Gump Shrimp Co.",
+        "start_time": "2023-08-15T13:15:00",
+        "end_time": "2023-08-15T14:30:00",
+        "venue_name": "Bubba Gump Shrimp Co.",
+        "cost": 35.0
+      },
+      {
+        "id": "event4",
+        "name": "Statue of Liberty & Ellis Island",
+        "description": "Ferry to visit the Statue of Liberty and Ellis Island",
+        "start_time": "2023-08-15T14:00:00",
+        "end_time": "2023-08-15T17:00:00",
+        "venue_name": "Statue of Liberty",
+        "cost": 25.0
+      }
+    ],
+    "venues": [
+      {
+        "name": "Empire State Building",
+        "address": "20 W 34th St, New York, NY 10001",
+        "latitude": 40.7484,
+        "longitude": -73.9857,
+        "opening_hours": "9:00 AM - 11:00 PM",
+        "place_id": "ChIJaXQRs6lZwokRY6EFpJnhNNE"
+      },
+      {
+        "name": "Times Square",
+        "address": "Manhattan, NY 10036",
+        "latitude": 40.758,
+        "longitude": -73.9855,
+        "opening_hours": "24 hours",
+        "place_id": "ChIJmQJIxlVYwokRLgeuocVOGVU"
+      },
+      {
+        "name": "Bubba Gump Shrimp Co.",
+        "address": "1501 Broadway, New York, NY 10036",
+        "latitude": 40.757,
+        "longitude": -73.9865,
+        "opening_hours": "11:00 AM - 10:00 PM",
+        "place_id": "ChIJdZRfXlRYwokR9QD2W2Kbumw"
+      },
+      {
+        "name": "Statue of Liberty",
+        "address": "New York, NY 10004",
+        "latitude": 40.6892,
+        "longitude": -74.0445,
+        "opening_hours": "9:30 AM - 5:00 PM",
+        "place_id": "ChIJPTacEpBQwokRKwIlDXelxkA"
+      }
+    ],
+    "routes": [
+      {
+        "from": "Empire State Building",
+        "to": "Times Square",
+        "travel_mode": "walking",
+        "verified": true,
+        "distance_meters": 1067,
+        "duration_seconds": 762,
+        "polyline": "mock_polyline_data",
+        "steps": [
+          {
+            "instruction": "Travel from origin to destination via walking",
+            "distance_meters": 1067,
+            "duration_seconds": 762
+          }
+        ]
+      },
+      {
+        "from": "Times Square",
+        "to": "Bubba Gump Shrimp Co.",
+        "travel_mode": "walking",
+        "verified": true,
+        "distance_meters": 139,
+        "duration_seconds": 99,
+        "polyline": "mock_polyline_data",
+        "steps": [
+          {
+            "instruction": "Travel from origin to destination via walking",
+            "distance_meters": 139,
+            "duration_seconds": 99
+          }
+        ]
+      },
+      {
+        "from": "Bubba Gump Shrimp Co.",
+        "to": "Statue of Liberty",
+        "travel_mode": "transit",
+        "verified": true,
+        "distance_meters": 8984,
+        "duration_seconds": 1082,
+        "polyline": "mock_polyline_data",
+        "steps": [
+          {
+            "instruction": "Travel from origin to destination via transit",
+            "distance_meters": 8984,
+            "duration_seconds": 1082
+          }
+        ]
+      }
+    ]
+  },
+  "verification": {
+    "is_feasible": false,
+    "total_issues": 1,
+    "all_issues": [
+      "Insufficient travel time from Bubba Gump Shrimp Co. to Statue of Liberty. Need 107.0 minutes, but only -30.0 minutes available."
+    ],
+    "details": {
+      "travel_times": {
+        "is_feasible": false,
+        "issues": [
+          "Insufficient travel time from Bubba Gump Shrimp Co. to Statue of Liberty. Need 107.0 minutes, but only -30.0 minutes available."
+        ]
+      },
+      "venue_hours": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "activity_durations": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "buffer_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "overall_timing": {
+        "is_feasible": true,
+        "issues": []
+      }
+    }
+  }
+}

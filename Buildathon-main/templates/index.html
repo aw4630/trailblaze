@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadway Show & Event Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .chat-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            display: flex;
+            height: calc(100vh - 4rem);
+        }
+        
+        .chat-sidebar {
+            width: 300px;
+            background-color: #fff;
+            border-radius: 10px 0 0 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .chat-main {
+            flex: 1;
+            background-color: #fff;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+            border-radius: 0 10px 0 0;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+            border-radius: 0 0 10px 0;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        
+        .bot-message {
+            background-color: #e9ecef;
+            color: #212529;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+        
+        .event-card {
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Broadway Show & Event Planner</h1>
+            <p>Find and plan your perfect Broadway experience!</p>
+        </header>
+        
+        <main>
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>Chat with Broadway Planner</h2>
+                </div>
+                <div id="messages">
+                    <!-- Messages will be added here dynamically -->
+                </div>
+                <form id="chat-form" class="chat-form">
+                    <input type="text" id="message-input" placeholder="Ask about Broadway shows or dinner options..." autocomplete="off">
+                    <button type="submit" class="send-button">Send</button>
+                </form>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 Broadway Show & Event Planner</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const chatMessages = document.getElementById('chat-messages');
+            const getLocationButton = document.getElementById('get-location');
+            const locationDisplay = document.getElementById('location-display');
+            const saveProfileButton = document.getElementById('save-profile');
+            
+            // User location
+            let userLocation = null;
+            
+            // Add click event listener for the send button
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Add event listener for Enter key in the message input
+            messageInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Get user location
+            getLocationButton.addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        userLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        };
+                        
+                        locationDisplay.textContent = `Lat: ${userLocation.latitude.toFixed(4)}, Lng: ${userLocation.longitude.toFixed(4)}`;
+                        
+                        // Update user profile with location
+                        updateUserProfile();
+                    }, function(error) {
+                        locationDisplay.textContent = `Error: ${error.message}`;
+                    });
+                } else {
+                    locationDisplay.textContent = "Geolocation is not supported by this browser.";
+                }
+            });
+            
+            // Save user profile
+            saveProfileButton.addEventListener('click', function() {
+                updateUserProfile();
+                alert('Profile saved!');
+            });
+            
+            // Update user profile
+            function updateUserProfile() {
+                const email = document.getElementById('email').value;
+                const accessibilityNeeds = [];
+                
+                if (document.getElementById('wheelchair').checked) {
+                    accessibilityNeeds.push('wheelchair');
+                }
+                
+                if (document.getElementById('hearing').checked) {
+                    accessibilityNeeds.push('hearing');
+                }
+                
+                if (document.getElementById('vision').checked) {
+                    accessibilityNeeds.push('vision');
+                }
+                
+                const walkingCapability = document.getElementById('walking-capability').value;
+                
+                const profileData = {
+                    email: email,
+                    accessibility_needs: accessibilityNeeds,
+                    walking_capability: walkingCapability
+                };
+                
+                if (userLocation) {
+                    profileData.location = userLocation;
+                }
+                
+                // Send profile data to server
+                fetch('/api/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(profileData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Profile updated:', data);
+                })
+                .catch(error => {
+                    console.error('Error updating profile:', error);
+                });
+            }
+            
+            // Send message
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                
+                if (message) {
+                    // Add user message to chat
+                    addMessage(message, 'user');
+                    
+                    // Clear input
+                    messageInput.value = '';
+                    
+                    // Send message to server
+                    fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ message: message })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Add bot response to chat
+                        addMessage(data.response, 'bot');
+                        
+                        // If there are events, display them
+                        if (data.events && data.events.length > 0) {
+                            displayEvents(data.events, data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error sending message:', error);
+                        addMessage('Sorry, there was an error processing your request.', 'bot');
+                    });
+                }
+            }
+            
+            // Add message to chat
+            function addMessage(message, sender) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+                messageElement.textContent = message;
+                
+                chatMessages.appendChild(messageElement);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Display events
+            function displayEvents(events, responseData) {
+                const eventsContainer = document.createElement('div');
+                eventsContainer.classList.add('events-container', 'my-3');
+                
+                events.forEach(event => {
+                    const eventCard = document.createElement('div');
+                    eventCard.classList.add('event-card', 'mb-3');
+                    
+                    let eventHtml = `
+                        <div class="card">
+                            ${event.image_url ? `<img src="${event.image_url}" class="event-image" alt="${event.name}">` : ''}
+                            <div class="card-body">
+                                <h5 class="card-title">${event.name}</h5>
+                                <p class="card-text">${event.description || 'No description available.'}</p>
+                                <p class="card-text"><small class="text-muted">Location: ${event.location.address}</small></p>
+                    `;
+                    
+                    if (event.showtimes && event.showtimes.length > 0) {
+                        eventHtml += '<p class="card-text"><strong>Showtimes:</strong></p><ul>';
+                        
+                        event.showtimes.forEach(showtime => {
+                            const startTime = new Date(showtime.start_time);
+                            const formattedTime = startTime.toLocaleString();
+                            eventHtml += `<li>${formattedTime} - ${showtime.availability || 'Available'}</li>`;
+                        });
+                        
+                        eventHtml += '</ul>';
+                    }
+                    
+                    if (event.prices && event.prices.length > 0) {
+                        eventHtml += '<p class="card-text"><strong>Prices:</strong></p><ul>';
+                        
+                        event.prices.forEach(price => {
+                            eventHtml += `<li>${price.category}: $${price.amount.toFixed(2)}</li>`;
+                        });
+                        
+                        eventHtml += '</ul>';
+                    }
+                    
+                    eventHtml += `
+                            </div>
+                        </div>
+                    `;
+                    
+                    eventCard.innerHTML = eventHtml;
+                    eventsContainer.appendChild(eventCard);
+                });
+                
+                // Add navigation details if available
+                if (responseData.navigation_plan) {
+                    const navigationCard = document.createElement('div');
+                    navigationCard.classList.add('event-card', 'mb-3');
+                    
+                    let navigationHtml = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Navigation Details</h5>
+                                <p class="card-text">Total travel distance: ${formatDistance(responseData.navigation_plan.total_distance)}</p>
+                                <p class="card-text">Total travel time: ${formatDuration(responseData.navigation_plan.total_duration)}</p>
+                                <hr>
+                                <h6>Routes:</h6>
+                                <ul>
+                    `;
+                    
+                    responseData.navigation_plan.routes.forEach((route, index) => {
+                        const fromLocation = index === 0 ? "Your current location" : events[index-1].name;
+                        const toLocation = events[index].name;
+                        
+                        navigationHtml += `
+                            <li>
+                                <strong>From ${fromLocation} to ${toLocation}</strong>
+                                <ul>
+                                    <li>Distance: ${formatDistance(route.distance)}</li>
+                                    <li>Travel time: ${formatDuration(route.duration)}</li>
+                                    <li>Travel mode: ${route.travel_mode}</li>
+                                </ul>
+                            </li>
+                        `;
+                    });
+                    
+                    navigationHtml += `
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                    
+                    navigationCard.innerHTML = navigationHtml;
+                    eventsContainer.appendChild(navigationCard);
+                }
+                
+                chatMessages.appendChild(eventsContainer);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Add helper functions for formatting
+            function formatDistance(meters) {
+                if (meters < 1000) {
+                    return `${Math.round(meters)} meters`;
+                } else {
+                    return `${(meters / 1000).toFixed(1)} kilometers`;
+                }
+            }
+            
+            function formatDuration(seconds) {
+                if (seconds < 60) {
+                    return `${seconds} seconds`;
+                }
+                
+                const minutes = Math.floor(seconds / 60);
+                if (minutes < 60) {
+                    return `${minutes} minutes`;
+                }
+                
+                const hours = Math.floor(minutes / 60);
+                const remainingMinutes = minutes % 60;
+                
+                if (remainingMinutes === 0) {
+                    return `${hours} hours`;
+                } else {
+                    return `${hours} hours ${remainingMinutes} minutes`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

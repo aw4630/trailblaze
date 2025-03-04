@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Places API Detailed Test</title>
+    <style>
+        #results {
+            margin: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #f8f8f8;
+            font-family: monospace;
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        .debug { color: #666; }
+        pre { 
+            background-color: #eee; 
+            padding: 10px; 
+            overflow: auto;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Places API Detailed Test</h1>
+    <div id="results"></div>
+
+    <script>
+        // Your API key
+        const apiKey = 'AIzaSyArWxtJ37sM3qBogEo9pG-e4Omv3gDKttw';
+        const logElement = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = message;
+            logElement.appendChild(entry);
+            console.log(`[${type}] ${message}`);
+        }
+        
+        function logJson(obj, type = 'debug') {
+            const entry = document.createElement('div');
+            entry.className = type;
+            
+            const pre = document.createElement('pre');
+            pre.textContent = JSON.stringify(obj, null, 2);
+            
+            entry.appendChild(pre);
+            logElement.appendChild(entry);
+        }
+
+        // Test different API endpoints directly
+        async function testApiEndpoint(name, url) {
+            log(`Testing ${name}...`, 'info');
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'REQUEST_DENIED') {
+                    log(`❌ ${name} test failed: ${data.status}`, 'error');
+                    if (data.error_message) {
+                        log(`Error message: ${data.error_message}`, 'error');
+                    }
+                    logJson(data);
+                    return false;
+                } else {
+                    log(`✅ ${name} test successful!`, 'success');
+                    logJson(data);
+                    return true;
+                }
+            } catch (error) {
+                log(`❌ ${name} test failed with error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Run all tests
+        async function runTests() {
+            log('=== STARTING DETAILED API TESTS ===', 'info');
+            log(`Testing API key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 5)}`, 'info');
+            
+            // Test 1: Check Geolocation API (often works even with restricted keys)
+            log('', 'info');
+            log('TEST 1: Google Geolocation API', 'info');
+            await testApiEndpoint(
+                'Geolocation API', 
+                `https://www.googleapis.com/geolocation/v1/geolocate?key=${apiKey}`
+            );
+            
+            // Test 2: Places Nearby API
+            log('', 'info');
+            log('TEST 2: Places Nearby API', 'info');
+            await testApiEndpoint(
+                'Places Nearby API',
+                `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670,151.1957&radius=500&type=restaurant&key=${apiKey}`
+            );
+            
+            // Test 3: Places Details API
+            log('', 'info');
+            log('TEST 3: Places Details API', 'info');
+            await testApiEndpoint(
+                'Places Details API',
+                `https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJ3S-JXmauEmsRUcIaWtf4MzE&fields=name,rating,formatted_phone_number&key=${apiKey}`
+            );
+            
+            // Test 4: Geocoding API
+            log('', 'info');
+            log('TEST 4: Geocoding API', 'info');
+            await testApiEndpoint(
+                'Geocoding API',
+                `https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=${apiKey}`
+            );
+            
+            // Test 5: Check API Key Info
+            log('', 'info');
+            log('TEST 5: API Key Information', 'info');
+            log('Note: This test may not work in the browser due to CORS restrictions', 'warning');
+            try {
+                const response = await fetch(`https://www.googleapis.com/apikeys/v2/key/${apiKey}`);
+                const data = await response.json();
+                log('API Key information retrieved', 'success');
+                logJson(data);
+            } catch (error) {
+                log(`Could not retrieve API key info: ${error.message}`, 'warning');
+                log('This is expected in browsers due to CORS restrictions', 'info');
+            }
+            
+            log('', 'info');
+            log('=== TESTS COMPLETED ===', 'info');
+            log('', 'info');
+            log('TROUBLESHOOTING RECOMMENDATIONS:', 'info');
+            log('1. Check if Places API is enabled in Google Cloud Console', 'info');
+            log('2. Verify billing is set up for your project', 'info');
+            log('3. Check API key restrictions - they might be too limiting', 'info');
+            log('4. Look for any specific error messages in the test results above', 'info');
+            log('5. If you have multiple API keys, make sure you\'re testing the correct one', 'info');
+            log('6. Note that direct API calls may be blocked by CORS in the browser - the key may still work server-side', 'warning');
+        }
+
+        // Start the tests
+        runTests();
+    </script>
+</body>
+</html>

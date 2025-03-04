@@ -1,0 +1,11 @@
+{
+    "routeName": "Broadway Show Experience",
+    "measurementType": "distance",
+    "measurementValue": 3,
+    "transportModes": ["Walk", "Public Transport"],
+    "theme": "Broadway",
+    "customPrompt": "I want to go see broadway tomorrow in New York New York",
+    "budget": {
+        "max": 200
+    }
+} 

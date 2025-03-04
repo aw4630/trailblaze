@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Planner - Broadway Show & Event Planner</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Custom Styles */
+        .hidden {
+            display: none;
+        }
+        
+        .timeline-container {
+            position: relative;
+            margin-top: 20px;
+            padding-left: 50px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .timeline-item.route {
+            border-left-color: #28a745;
+            background-color: #f0f8f6;
+        }
+        
+        .timeline-item.not-verified {
+            border-left-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        
+        .timeline-time {
+            position: absolute;
+            left: -60px;
+            top: 15px;
+            font-weight: bold;
+            color: #343a40;
+        }
+        
+        .timeline-connector {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            height: 100%;
+            border-left: 2px dashed #ccc;
+            z-index: -1;
+        }
+        
+        .verification-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.8em;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 0.25rem solid rgba(0, 123, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #007bff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .transit-details {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .issue-alert {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 0.25rem;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">AI-Driven Event Planner</h1>
+        <p class="lead">Tell me what you want to do and I'll create a complete plan with venues, showtimes, and routes.</p>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="plannerForm">
+                    <div class="mb-3">
+                        <label for="query" class="form-label">What would you like to do?</label>
+                        <input type="text" class="form-control" id="query" placeholder="e.g., I want to see a Broadway show and have dinner in New York tonight">
+                    </div>
+                    <div class="mb-3">
+                        <label for="transportMode" class="form-label">Preferred transportation mode</label>
+                        <select class="form-select" id="transportMode">
+                            <option value="WALKING">Walking</option>
+                            <option value="TRANSIT">Public Transit</option>
+                            <option value="DRIVING">Driving</option>
+                            <option value="BICYCLING">Bicycling</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Plan</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="loadingIndicator" class="text-center py-4 hidden">
+            <div class="loading-spinner mb-3"></div>
+            <p class="lead">Generating your personalized plan...</p>
+            <p class="text-muted">This may take a moment as we check real venues, showtimes, and routes.</p>
+        </div>
+        
+        <div id="errorContainer" class="alert alert-danger hidden" role="alert">
+            <strong>Error:</strong> <span id="errorMessage"></span>
+        </div>
+        
+        <div id="resultsContainer" class="hidden">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Your Plan</h3>
+                    <span class="badge bg-info" id="iterationBadge">Iterations: 0</span>
+                </div>
+                <div class="card-body">
+                    <p class="lead" id="planSummary"></p>
+                    
+                    <!-- Current Time -->
+                    <div class="alert alert-info">
+                        <strong>Current Time:</strong> <span id="currentTime"></span>
+                    </div>
+                    
+                    <!-- Issues Section -->
+                    <div id="issuesContainer" class="hidden">
+                        <div class="alert alert-warning">
+                            <h5>Issues Found</h5>
+                            <p>The following issues were found with your plan. We've adjusted it to be more realistic:</p>
+                            <ul id="issuesList"></ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline Tab -->
+                    <h4 class="mt-4 mb-3">Timeline</h4>
+                    <div class="timeline-container">
+                        <div class="timeline-connector"></div>
+                        <div id="timelineContent"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Venues Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Venues</h4>
+                </div>
+                <div class="card-body">
+                    <div id="venuesContainer" class="row"></div>
+                </div>
+            </div>
+            
+            <!-- Events Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Events</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Event</th>
+                                    <th>Venue</th>
+                                    <th>Duration</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Routes Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Routes</h4>
+                </div>
+                <div class="card-body">
+                    <div id="routesContainer"></div>
+                </div>
+            </div>
+            
+            <!-- Plan Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Plan Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Duration</h5>
+                                    <p class="card-text display-6" id="totalDuration">0 hrs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Cost</h5>
+                                    <p class="card-text display-6" id="totalCost">$0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Transportation</h5>
+                                    <p class="card-text display-6" id="transportationMode">Walking</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/ai_planner.js"></script>
+</body>
+</html> 

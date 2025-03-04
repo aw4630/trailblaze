@@ -1,0 +1,11 @@
+{
+  "routeName": "NYC Art & Food Tour",
+  "measurementType": "distance",
+  "measurementValue": 3,
+  "transportModes": ["Walk", "Subway"],
+  "theme": "Art and Cuisine",
+  "customPrompt": "I'd like an itinerary that focuses on art museums and great food spots in Manhattan. Please include at least one art gallery and one famous restaurant.",
+  "budget": {
+    "max": 150
+  }
+} 

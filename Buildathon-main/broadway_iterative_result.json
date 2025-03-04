@@ -1,0 +1,225 @@
+{
+  "final_itinerary": {
+    "name": "Broadway Show Experience",
+    "description": "Immerse yourself in the magic of Broadway with a show in New York City.",
+    "events": [
+      {
+        "id": "event1",
+        "name": "Broadway Show",
+        "description": "Enjoy a captivating Broadway show",
+        "start_time": "2023-10-18T19:00:00",
+        "end_time": "2023-10-18T21:30:00",
+        "venue_name": "Broadway Theatre",
+        "cost": 150
+      }
+    ],
+    "venues": [
+      {
+        "name": "Broadway Theatre",
+        "address": "1681 Broadway, New York, NY 10019",
+        "latitude": 40.7634,
+        "longitude": -73.9844,
+        "opening_hours": "Varies",
+        "place_id": "ChIJRZtW8YVYwokRqfMM5jBj9tE"
+      }
+    ],
+    "routes": [
+      {
+        "from": "Hotel",
+        "to": "Broadway Theatre",
+        "mode": "Walk"
+      },
+      {
+        "from": "Broadway Theatre",
+        "to": "Hotel",
+        "mode": "Walk"
+      }
+    ]
+  },
+  "verification": {
+    "is_feasible": true,
+    "total_issues": 0,
+    "all_issues": [],
+    "details": {
+      "venue_hours": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "travel_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "activity_durations": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "buffer_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "overall_timing": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "format": {
+        "is_feasible": true,
+        "issues": []
+      }
+    }
+  },
+  "is_valid": true,
+  "attempts": [
+    {
+      "attempt": 1,
+      "itinerary": {
+        "name": "Broadway Show Experience",
+        "description": "Immerse yourself in the magic of Broadway with a show in New York City.",
+        "events": [
+          {
+            "id": 1,
+            "name": "Broadway Show",
+            "description": "Enjoy a captivating Broadway show",
+            "start_time": "2023-10-18T19:30:00",
+            "end_time": "2023-10-18T22:30:00",
+            "venue_name": "Broadway Theatre",
+            "cost": 150
+          }
+        ],
+        "venues": [
+          {
+            "name": "Broadway Theatre",
+            "address": "1681 Broadway, New York, NY 10019",
+            "latitude": 40.7634,
+            "longitude": -73.9844,
+            "opening_hours": "Varies",
+            "place_id": "ChIJRZtW8YVYwokRqfMM5jBj9tE"
+          }
+        ],
+        "routes": [
+          {
+            "from": "Hotel",
+            "to": "Broadway Theatre",
+            "mode": "Walk"
+          },
+          {
+            "from": "Broadway Theatre",
+            "to": "Hotel",
+            "mode": "Walk"
+          }
+        ]
+      },
+      "verification": {
+        "is_feasible": false,
+        "total_issues": 1,
+        "all_issues": [
+          "Itinerary ends very late (22:30)"
+        ],
+        "details": {
+          "venue_hours": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "travel_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "activity_durations": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "buffer_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "overall_timing": {
+            "is_feasible": false,
+            "issues": [
+              "Itinerary ends very late (22:30)"
+            ]
+          },
+          "format": {
+            "is_feasible": true,
+            "issues": []
+          }
+        }
+      }
+    },
+    {
+      "attempt": 2,
+      "itinerary": {
+        "name": "Broadway Show Experience",
+        "description": "Immerse yourself in the magic of Broadway with a show in New York City.",
+        "events": [
+          {
+            "id": "event1",
+            "name": "Broadway Show",
+            "description": "Enjoy a captivating Broadway show",
+            "start_time": "2023-10-18T19:00:00",
+            "end_time": "2023-10-18T21:30:00",
+            "venue_name": "Broadway Theatre",
+            "cost": 150
+          }
+        ],
+        "venues": [
+          {
+            "name": "Broadway Theatre",
+            "address": "1681 Broadway, New York, NY 10019",
+            "latitude": 40.7634,
+            "longitude": -73.9844,
+            "opening_hours": "Varies",
+            "place_id": "ChIJRZtW8YVYwokRqfMM5jBj9tE"
+          }
+        ],
+        "routes": [
+          {
+            "from": "Hotel",
+            "to": "Broadway Theatre",
+            "mode": "Walk"
+          },
+          {
+            "from": "Broadway Theatre",
+            "to": "Hotel",
+            "mode": "Walk"
+          }
+        ]
+      },
+      "verification": {
+        "is_feasible": true,
+        "total_issues": 0,
+        "all_issues": [],
+        "details": {
+          "venue_hours": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "travel_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "activity_durations": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "buffer_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "overall_timing": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "format": {
+            "is_feasible": true,
+            "issues": []
+          }
+        }
+      }
+    }
+  ],
+  "total_attempts": 2,
+  "stats": {
+    "processing_time_seconds": 5.318547010421753,
+    "is_valid": true,
+    "total_attempts": 2
+  }
+}

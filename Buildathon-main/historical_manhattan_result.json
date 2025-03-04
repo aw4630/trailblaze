@@ -1,0 +1,553 @@
+{
+  "final_itinerary": {
+    "name": "Historical Manhattan Tour",
+    "description": "Explore significant historical landmarks and sites in Manhattan, focusing on events from the early development of New York City through the 20th century. Discover the Revolutionary War period, the immigration boom of the late 19th/early 20th centuries, and important civil rights locations with diverse perspectives on New York's history.",
+    "events": [
+      {
+        "id": "event1",
+        "name": "Revolutionary War Walking Tour",
+        "description": "Guided tour exploring Revolutionary War sites in Manhattan",
+        "start_time": "2023-06-10T10:00:00",
+        "end_time": "2023-06-10T13:00:00",
+        "venue_name": "Fraunces Tavern",
+        "cost": 25
+      },
+      {
+        "id": "event2",
+        "name": "Ellis Island Immigration Museum",
+        "description": "Learn about the immigrant experience at Ellis Island",
+        "start_time": "2023-06-11T09:30:00",
+        "end_time": "2023-06-11T12:30:00",
+        "venue_name": "Ellis Island Immigration Museum",
+        "cost": 20
+      },
+      {
+        "id": "event3",
+        "name": "Tenement Museum",
+        "description": "Explore the history of immigration and migrant experiences in a preserved tenement building",
+        "start_time": "2023-06-11T14:00:00",
+        "end_time": "2023-06-11T16:00:00",
+        "venue_name": "Tenement Museum",
+        "cost": 30
+      },
+      {
+        "id": "event4",
+        "name": "Harlem Civil Rights Walking Tour",
+        "description": "Guided tour of Harlem highlighting key civil rights locations",
+        "start_time": "2023-06-11T17:00:00",
+        "end_time": "2023-06-11T19:00:00",
+        "venue_name": "Schomburg Center for Research in Black Culture",
+        "cost": 35
+      }
+    ],
+    "venues": [
+      {
+        "name": "Fraunces Tavern",
+        "address": "54 Pearl St, New York, NY 10004",
+        "latitude": 40.7033,
+        "longitude": -74.0115,
+        "opening_hours": "10:00-17:00",
+        "place_id": "ChIJy4M1xR9awokRkGK6VUgYzA4"
+      },
+      {
+        "name": "Ellis Island Immigration Museum",
+        "address": "Ellis Island, New York, NY 10004",
+        "latitude": 40.6996,
+        "longitude": -74.0392,
+        "opening_hours": "09:30-15:30",
+        "place_id": "ChIJtQ9TvBV3wokR7rRtNCYiQYE"
+      },
+      {
+        "name": "Tenement Museum",
+        "address": "103 Orchard St, New York, NY 10002",
+        "latitude": 40.7188,
+        "longitude": -73.9904,
+        "opening_hours": "10:00-18:30",
+        "place_id": "ChIJEYqgVx5ZwokRqoZah1YrGuw"
+      },
+      {
+        "name": "Schomburg Center for Research in Black Culture",
+        "address": "515 Malcolm X Blvd, New York, NY 10037",
+        "latitude": 40.8149,
+        "longitude": -73.9409,
+        "opening_hours": "12:00-18:00",
+        "place_id": "ChIJa4wHMc72wokRcvV8pMgjJl0"
+      }
+    ],
+    "routes": [
+      {
+        "from": "Fraunces Tavern",
+        "to": "Ellis Island Immigration Museum",
+        "transportation": "Public Transport"
+      },
+      {
+        "from": "Ellis Island Immigration Museum",
+        "to": "Tenement Museum",
+        "transportation": "Public Transport"
+      },
+      {
+        "from": "Tenement Museum",
+        "to": "Schomburg Center for Research in Black Culture",
+        "transportation": "Public Transport"
+      }
+    ]
+  },
+  "verification": {
+    "is_feasible": false,
+    "total_issues": 2,
+    "all_issues": [
+      "Schomburg Center for Research in Black Culture will be closed before the event ends. Closes at 18:00",
+      "Itinerary is very long (33.00 hours). Consider splitting across multiple days."
+    ],
+    "details": {
+      "venue_hours": {
+        "is_feasible": false,
+        "issues": [
+          "Schomburg Center for Research in Black Culture will be closed before the event ends. Closes at 18:00"
+        ]
+      },
+      "travel_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "activity_durations": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "buffer_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "overall_timing": {
+        "is_feasible": true,
+        "issues": [
+          "Itinerary is very long (33.00 hours). Consider splitting across multiple days."
+        ]
+      },
+      "format": {
+        "is_feasible": true,
+        "issues": []
+      }
+    }
+  },
+  "is_valid": false,
+  "attempts": [
+    {
+      "attempt": 1,
+      "itinerary": {
+        "name": "Historical Manhattan Tour",
+        "description": "Explore significant historical landmarks and sites in Manhattan, focusing on events from the early development of New York City through the 20th century. Discover the Revolutionary War period, the immigration boom of the late 19th/early 20th centuries, and important civil rights locations with diverse perspectives on New York's history.",
+        "events": [
+          {
+            "id": 1,
+            "name": "Revolutionary War Walking Tour",
+            "description": "Guided tour exploring Revolutionary War sites in Manhattan",
+            "start_time": "2023-06-10T09:00:00",
+            "end_time": "2023-06-10T12:00:00",
+            "venue_name": "Fraunces Tavern",
+            "cost": 25
+          },
+          {
+            "id": 2,
+            "name": "Ellis Island Immigration Museum",
+            "description": "Learn about the immigrant experience at Ellis Island",
+            "start_time": "2023-06-10T13:00:00",
+            "end_time": "2023-06-10T16:00:00",
+            "venue_name": "Ellis Island Immigration Museum",
+            "cost": 20
+          },
+          {
+            "id": 3,
+            "name": "Tenement Museum",
+            "description": "Explore the history of immigration and migrant experiences in a preserved tenement building",
+            "start_time": "2023-06-10T17:00:00",
+            "end_time": "2023-06-10T19:00:00",
+            "venue_name": "Tenement Museum",
+            "cost": 30
+          },
+          {
+            "id": 4,
+            "name": "Harlem Civil Rights Walking Tour",
+            "description": "Guided tour of Harlem highlighting key civil rights locations",
+            "start_time": "2023-06-10T20:00:00",
+            "end_time": "2023-06-10T22:00:00",
+            "venue_name": "Schomburg Center for Research in Black Culture",
+            "cost": 35
+          }
+        ],
+        "venues": [
+          {
+            "name": "Fraunces Tavern",
+            "address": "54 Pearl St, New York, NY 10004",
+            "latitude": 40.7033,
+            "longitude": -74.0115,
+            "opening_hours": "10:00-17:00",
+            "place_id": "ChIJy4M1xR9awokRkGK6VUgYzA4"
+          },
+          {
+            "name": "Ellis Island Immigration Museum",
+            "address": "Ellis Island, New York, NY 10004",
+            "latitude": 40.6996,
+            "longitude": -74.0392,
+            "opening_hours": "09:30-15:30",
+            "place_id": "ChIJtQ9TvBV3wokR7rRtNCYiQYE"
+          },
+          {
+            "name": "Tenement Museum",
+            "address": "103 Orchard St, New York, NY 10002",
+            "latitude": 40.7188,
+            "longitude": -73.9904,
+            "opening_hours": "10:00-18:30",
+            "place_id": "ChIJEYqgVx5ZwokRqoZah1YrGuw"
+          },
+          {
+            "name": "Schomburg Center for Research in Black Culture",
+            "address": "515 Malcolm X Blvd, New York, NY 10037",
+            "latitude": 40.8149,
+            "longitude": -73.9409,
+            "opening_hours": "12:00-18:00",
+            "place_id": "ChIJa4wHMc72wokRcvV8pMgjJl0"
+          }
+        ],
+        "routes": [
+          {
+            "from": "Fraunces Tavern",
+            "to": "Ellis Island Immigration Museum",
+            "transportation": "Public Transport"
+          },
+          {
+            "from": "Ellis Island Immigration Museum",
+            "to": "Tenement Museum",
+            "transportation": "Walk"
+          },
+          {
+            "from": "Tenement Museum",
+            "to": "Schomburg Center for Research in Black Culture",
+            "transportation": "Public Transport"
+          }
+        ]
+      },
+      "verification": {
+        "is_feasible": false,
+        "total_issues": 6,
+        "all_issues": [
+          "Fraunces Tavern is not open at the planned start time. Opens at 10:00",
+          "Ellis Island Immigration Museum will be closed before the event ends. Closes at 15:30",
+          "Tenement Museum will be closed before the event ends. Closes at 18:30",
+          "Schomburg Center for Research in Black Culture will be closed before the event ends. Closes at 18:00",
+          "Insufficient travel time from Ellis Island Immigration Museum to Tenement Museum. Need 83.2 minutes, but only 60.0 minutes available.",
+          "Itinerary is very long (13.00 hours). Consider splitting across multiple days."
+        ],
+        "details": {
+          "venue_hours": {
+            "is_feasible": false,
+            "issues": [
+              "Fraunces Tavern is not open at the planned start time. Opens at 10:00",
+              "Ellis Island Immigration Museum will be closed before the event ends. Closes at 15:30",
+              "Tenement Museum will be closed before the event ends. Closes at 18:30",
+              "Schomburg Center for Research in Black Culture will be closed before the event ends. Closes at 18:00"
+            ]
+          },
+          "travel_times": {
+            "is_feasible": false,
+            "issues": [
+              "Insufficient travel time from Ellis Island Immigration Museum to Tenement Museum. Need 83.2 minutes, but only 60.0 minutes available."
+            ]
+          },
+          "activity_durations": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "buffer_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "overall_timing": {
+            "is_feasible": true,
+            "issues": [
+              "Itinerary is very long (13.00 hours). Consider splitting across multiple days."
+            ]
+          },
+          "format": {
+            "is_feasible": true,
+            "issues": []
+          }
+        }
+      }
+    },
+    {
+      "attempt": 2,
+      "itinerary": {
+        "name": "Historical Manhattan Tour",
+        "description": "Explore significant historical landmarks and sites in Manhattan, focusing on events from the early development of New York City through the 20th century. Discover the Revolutionary War period, the immigration boom of the late 19th/early 20th centuries, and important civil rights locations with diverse perspectives on New York's history.",
+        "events": [
+          {
+            "id": "event1",
+            "name": "Revolutionary War Walking Tour",
+            "description": "Guided tour exploring Revolutionary War sites in Manhattan",
+            "start_time": "2023-06-10T10:00:00",
+            "end_time": "2023-06-10T13:00:00",
+            "venue_name": "Fraunces Tavern",
+            "cost": 25
+          },
+          {
+            "id": "event2",
+            "name": "Ellis Island Immigration Museum",
+            "description": "Learn about the immigrant experience at Ellis Island",
+            "start_time": "2023-06-11T09:30:00",
+            "end_time": "2023-06-11T12:30:00",
+            "venue_name": "Ellis Island Immigration Museum",
+            "cost": 20
+          },
+          {
+            "id": "event3",
+            "name": "Tenement Museum",
+            "description": "Explore the history of immigration and migrant experiences in a preserved tenement building",
+            "start_time": "2023-06-11T14:00:00",
+            "end_time": "2023-06-11T16:00:00",
+            "venue_name": "Tenement Museum",
+            "cost": 30
+          },
+          {
+            "id": "event4",
+            "name": "Harlem Civil Rights Walking Tour",
+            "description": "Guided tour of Harlem highlighting key civil rights locations",
+            "start_time": "2023-06-11T17:00:00",
+            "end_time": "2023-06-11T19:00:00",
+            "venue_name": "Schomburg Center for Research in Black Culture",
+            "cost": 35
+          }
+        ],
+        "venues": [
+          {
+            "name": "Fraunces Tavern",
+            "address": "54 Pearl St, New York, NY 10004",
+            "latitude": 40.7033,
+            "longitude": -74.0115,
+            "opening_hours": "10:00-17:00",
+            "place_id": "ChIJy4M1xR9awokRkGK6VUgYzA4"
+          },
+          {
+            "name": "Ellis Island Immigration Museum",
+            "address": "Ellis Island, New York, NY 10004",
+            "latitude": 40.6996,
+            "longitude": -74.0392,
+            "opening_hours": "09:30-15:30",
+            "place_id": "ChIJtQ9TvBV3wokR7rRtNCYiQYE"
+          },
+          {
+            "name": "Tenement Museum",
+            "address": "103 Orchard St, New York, NY 10002",
+            "latitude": 40.7188,
+            "longitude": -73.9904,
+            "opening_hours": "10:00-18:30",
+            "place_id": "ChIJEYqgVx5ZwokRqoZah1YrGuw"
+          },
+          {
+            "name": "Schomburg Center for Research in Black Culture",
+            "address": "515 Malcolm X Blvd, New York, NY 10037",
+            "latitude": 40.8149,
+            "longitude": -73.9409,
+            "opening_hours": "12:00-18:00",
+            "place_id": "ChIJa4wHMc72wokRcvV8pMgjJl0"
+          }
+        ],
+        "routes": [
+          {
+            "from": "Fraunces Tavern",
+            "to": "Ellis Island Immigration Museum",
+            "transportation": "Public Transport"
+          },
+          {
+            "from": "Ellis Island Immigration Museum",
+            "to": "Tenement Museum",
+            "transportation": "Public Transport"
+          },
+          {
+            "from": "Tenement Museum",
+            "to": "Schomburg Center for Research in Black Culture",
+            "transportation": "Public Transport"
+          }
+        ]
+      },
+      "verification": {
+        "is_feasible": false,
+        "total_issues": 2,
+        "all_issues": [
+          "Schomburg Center for Research in Black Culture will be closed before the event ends. Closes at 18:00",
+          "Itinerary is very long (33.00 hours). Consider splitting across multiple days."
+        ],
+        "details": {
+          "venue_hours": {
+            "is_feasible": false,
+            "issues": [
+              "Schomburg Center for Research in Black Culture will be closed before the event ends. Closes at 18:00"
+            ]
+          },
+          "travel_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "activity_durations": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "buffer_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "overall_timing": {
+            "is_feasible": true,
+            "issues": [
+              "Itinerary is very long (33.00 hours). Consider splitting across multiple days."
+            ]
+          },
+          "format": {
+            "is_feasible": true,
+            "issues": []
+          }
+        }
+      }
+    },
+    {
+      "attempt": 3,
+      "itinerary": {
+        "name": "Historical Manhattan Tour",
+        "description": "Explore significant historical landmarks and sites in Manhattan, focusing on events from the early development of New York City through the 20th century. Discover the Revolutionary War period, the immigration boom of the late 19th/early 20th centuries, and important civil rights locations with diverse perspectives on New York's history.",
+        "events": [
+          {
+            "id": "event1",
+            "name": "Revolutionary War Walking Tour",
+            "description": "Guided tour exploring Revolutionary War sites in Manhattan",
+            "start_time": "2023-06-10T10:00:00",
+            "end_time": "2023-06-10T13:00:00",
+            "venue_name": "Fraunces Tavern",
+            "cost": 25
+          },
+          {
+            "id": "event2",
+            "name": "Ellis Island Immigration Museum",
+            "description": "Learn about the immigrant experience at Ellis Island",
+            "start_time": "2023-06-10T14:00:00",
+            "end_time": "2023-06-10T17:00:00",
+            "venue_name": "Ellis Island Immigration Museum",
+            "cost": 20
+          },
+          {
+            "id": "event3",
+            "name": "Tenement Museum",
+            "description": "Explore the history of immigration and migrant experiences in a preserved tenement building",
+            "start_time": "2023-06-11T10:00:00",
+            "end_time": "2023-06-11T12:00:00",
+            "venue_name": "Tenement Museum",
+            "cost": 30
+          },
+          {
+            "id": "event4",
+            "name": "Harlem Civil Rights Walking Tour",
+            "description": "Guided tour of Harlem highlighting key civil rights locations",
+            "start_time": "2023-06-11T13:00:00",
+            "end_time": "2023-06-11T15:00:00",
+            "venue_name": "Schomburg Center for Research in Black Culture",
+            "cost": 35
+          }
+        ],
+        "venues": [
+          {
+            "name": "Fraunces Tavern",
+            "address": "54 Pearl St, New York, NY 10004",
+            "latitude": 40.7033,
+            "longitude": -74.0115,
+            "opening_hours": "10:00-17:00",
+            "place_id": "ChIJy4M1xR9awokRkGK6VUgYzA4"
+          },
+          {
+            "name": "Ellis Island Immigration Museum",
+            "address": "Ellis Island, New York, NY 10004",
+            "latitude": 40.6996,
+            "longitude": -74.0392,
+            "opening_hours": "09:30-15:30",
+            "place_id": "ChIJtQ9TvBV3wokR7rRtNCYiQYE"
+          },
+          {
+            "name": "Tenement Museum",
+            "address": "103 Orchard St, New York, NY 10002",
+            "latitude": 40.7188,
+            "longitude": -73.9904,
+            "opening_hours": "10:00-18:30",
+            "place_id": "ChIJEYqgVx5ZwokRqoZah1YrGuw"
+          },
+          {
+            "name": "Schomburg Center for Research in Black Culture",
+            "address": "515 Malcolm X Blvd, New York, NY 10037",
+            "latitude": 40.8149,
+            "longitude": -73.9409,
+            "opening_hours": "12:00-18:00",
+            "place_id": "ChIJa4wHMc72wokRcvV8pMgjJl0"
+          }
+        ],
+        "routes": [
+          {
+            "from": "Fraunces Tavern",
+            "to": "Ellis Island Immigration Museum",
+            "transportation": "Public Transport"
+          },
+          {
+            "from": "Ellis Island Immigration Museum",
+            "to": "Tenement Museum",
+            "transportation": "Public Transport"
+          },
+          {
+            "from": "Tenement Museum",
+            "to": "Schomburg Center for Research in Black Culture",
+            "transportation": "Public Transport"
+          }
+        ]
+      },
+      "verification": {
+        "is_feasible": false,
+        "total_issues": 2,
+        "all_issues": [
+          "Ellis Island Immigration Museum will be closed before the event ends. Closes at 15:30",
+          "Itinerary is very long (29.00 hours). Consider splitting across multiple days."
+        ],
+        "details": {
+          "venue_hours": {
+            "is_feasible": false,
+            "issues": [
+              "Ellis Island Immigration Museum will be closed before the event ends. Closes at 15:30"
+            ]
+          },
+          "travel_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "activity_durations": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "buffer_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "overall_timing": {
+            "is_feasible": true,
+            "issues": [
+              "Itinerary is very long (29.00 hours). Consider splitting across multiple days."
+            ]
+          },
+          "format": {
+            "is_feasible": true,
+            "issues": []
+          }
+        }
+      }
+    }
+  ],
+  "total_attempts": 3,
+  "stats": {
+    "processing_time_seconds": 58.636550188064575,
+    "is_valid": false,
+    "total_attempts": 3
+  }
+}

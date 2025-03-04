@@ -1,0 +1,43 @@
+{
+  "is_feasible": false,
+  "total_issues": 6,
+  "all_issues": [
+    "Insufficient travel time from Metropolitan Museum of Art to Stroll through Central Park. Need 21.4 minutes, but only 15.0 minutes available.",
+    "Insufficient travel time from The Phantom of the Opera to Late Dinner at Carmine's. Need 20.4 minutes, but only 15.0 minutes available.",
+    "Sarabeth's Central Park South is not open at the planned start time. Opens at 11:00",
+    "Carmine's Italian Restaurant will be closed before the event ends. Closes at 23:00",
+    "Itinerary is very long (13.00 hours). Consider splitting across multiple days.",
+    "Itinerary ends very late (23:30)"
+  ],
+  "details": {
+    "travel_times": {
+      "is_feasible": false,
+      "issues": [
+        "Insufficient travel time from Metropolitan Museum of Art to Stroll through Central Park. Need 21.4 minutes, but only 15.0 minutes available.",
+        "Insufficient travel time from The Phantom of the Opera to Late Dinner at Carmine's. Need 20.4 minutes, but only 15.0 minutes available."
+      ]
+    },
+    "venue_hours": {
+      "is_feasible": false,
+      "issues": [
+        "Sarabeth's Central Park South is not open at the planned start time. Opens at 11:00",
+        "Carmine's Italian Restaurant will be closed before the event ends. Closes at 23:00"
+      ]
+    },
+    "activity_durations": {
+      "is_feasible": true,
+      "issues": []
+    },
+    "buffer_times": {
+      "is_feasible": true,
+      "issues": []
+    },
+    "overall_timing": {
+      "is_feasible": true,
+      "issues": [
+        "Itinerary is very long (13.00 hours). Consider splitting across multiple days.",
+        "Itinerary ends very late (23:30)"
+      ]
+    }
+  }
+}

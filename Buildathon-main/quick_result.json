@@ -1,0 +1,322 @@
+{
+  "final_itinerary": {
+    "name": "Custom Manhattan Tour",
+    "description": "A historical events-themed tour in Manhattan covering the Statue of Liberty, Ellis Island, and the Tenement Museum.",
+    "events": [
+      {
+        "id": "event1",
+        "name": "Visit Statue of Liberty",
+        "description": "Explore the iconic Statue of Liberty, a symbol of freedom and democracy.",
+        "start_time": "2023-07-10T09:00:00",
+        "end_time": "2023-07-10T11:00:00",
+        "venue_name": "Statue of Liberty",
+        "cost": 25
+      },
+      {
+        "id": "event2",
+        "name": "Visit Ellis Island",
+        "description": "Discover the history of immigration at Ellis Island, a gateway to the United States.",
+        "start_time": "2023-07-10T11:30:00",
+        "end_time": "2023-07-10T13:30:00",
+        "venue_name": "Ellis Island",
+        "cost": 18
+      },
+      {
+        "id": "event3",
+        "name": "Visit Tenement Museum",
+        "description": "Experience the immigrant stories at the Tenement Museum, depicting life in 19th and 20th-century New York.",
+        "start_time": "2023-07-10T15:00:00",
+        "end_time": "2023-07-10T17:00:00",
+        "venue_name": "Tenement Museum",
+        "cost": 15
+      }
+    ],
+    "venues": [
+      {
+        "name": "Statue of Liberty",
+        "address": "New York, NY 10004, United States",
+        "latitude": 40.689247,
+        "longitude": -74.044502,
+        "opening_hours": "08:30-17:00",
+        "place_id": "ChIJPTacEpBQwokRKwIlDXelxkA"
+      },
+      {
+        "name": "Ellis Island",
+        "address": "Ellis Island, United States",
+        "latitude": 40.699717,
+        "longitude": -74.03921,
+        "opening_hours": "09:30-16:30",
+        "place_id": "ChIJSUNyvUBT1IkRZbnieAegxLk"
+      },
+      {
+        "name": "Tenement Museum",
+        "address": "103 Orchard St, New York, NY 10002, United States",
+        "latitude": 40.718754,
+        "longitude": -73.990854,
+        "opening_hours": "10:00-18:30",
+        "place_id": "ChIJQ2_oHodZwokRgXW6oM0j3dE"
+      }
+    ],
+    "routes": [
+      {
+        "from": "Statue of Liberty",
+        "to": "Ellis Island",
+        "mode": "Public Transport"
+      },
+      {
+        "from": "Ellis Island",
+        "to": "Tenement Museum",
+        "mode": "Public Transport"
+      }
+    ]
+  },
+  "verification": {
+    "is_feasible": true,
+    "total_issues": 0,
+    "all_issues": [],
+    "details": {
+      "venue_hours": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "travel_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "activity_durations": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "buffer_times": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "overall_timing": {
+        "is_feasible": true,
+        "issues": []
+      },
+      "format": {
+        "is_feasible": true,
+        "issues": []
+      }
+    }
+  },
+  "is_valid": true,
+  "attempts": [
+    {
+      "attempt": 1,
+      "itinerary": {
+        "name": "Custom Manhattan Tour",
+        "description": "A historical events-themed tour in Manhattan covering the Statue of Liberty, Ellis Island, and the Tenement Museum.",
+        "events": [
+          {
+            "id": 1,
+            "name": "Visit Statue of Liberty",
+            "description": "Explore the iconic Statue of Liberty, a symbol of freedom and democracy.",
+            "start_time": "2023-07-10T09:00:00",
+            "end_time": "2023-07-10T11:00:00",
+            "venue_name": "Statue of Liberty",
+            "cost": 25
+          },
+          {
+            "id": 2,
+            "name": "Visit Ellis Island",
+            "description": "Discover the history of immigration at Ellis Island, a gateway to the United States.",
+            "start_time": "2023-07-10T11:30:00",
+            "end_time": "2023-07-10T13:30:00",
+            "venue_name": "Ellis Island",
+            "cost": 18
+          },
+          {
+            "id": 3,
+            "name": "Visit Tenement Museum",
+            "description": "Experience the immigrant stories at the Tenement Museum, depicting life in 19th and 20th-century New York.",
+            "start_time": "2023-07-10T14:00:00",
+            "end_time": "2023-07-10T16:00:00",
+            "venue_name": "Tenement Museum",
+            "cost": 15
+          }
+        ],
+        "venues": [
+          {
+            "name": "Statue of Liberty",
+            "address": "New York, NY 10004, United States",
+            "latitude": 40.689247,
+            "longitude": -74.044502,
+            "opening_hours": "08:30-17:00",
+            "place_id": "ChIJPTacEpBQwokRKwIlDXelxkA"
+          },
+          {
+            "name": "Ellis Island",
+            "address": "Ellis Island, United States",
+            "latitude": 40.699717,
+            "longitude": -74.03921,
+            "opening_hours": "09:30-16:30",
+            "place_id": "ChIJSUNyvUBT1IkRZbnieAegxLk"
+          },
+          {
+            "name": "Tenement Museum",
+            "address": "103 Orchard St, New York, NY 10002, United States",
+            "latitude": 40.718754,
+            "longitude": -73.990854,
+            "opening_hours": "10:00-18:30",
+            "place_id": "ChIJQ2_oHodZwokRgXW6oM0j3dE"
+          }
+        ],
+        "routes": [
+          {
+            "from": "Statue of Liberty",
+            "to": "Ellis Island",
+            "mode": "Public Transport"
+          },
+          {
+            "from": "Ellis Island",
+            "to": "Tenement Museum",
+            "mode": "Walk"
+          }
+        ]
+      },
+      "verification": {
+        "is_feasible": false,
+        "total_issues": 1,
+        "all_issues": [
+          "Insufficient travel time from Ellis Island to Tenement Museum. Need 82.5 minutes, but only 30.0 minutes available."
+        ],
+        "details": {
+          "venue_hours": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "travel_times": {
+            "is_feasible": false,
+            "issues": [
+              "Insufficient travel time from Ellis Island to Tenement Museum. Need 82.5 minutes, but only 30.0 minutes available."
+            ]
+          },
+          "activity_durations": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "buffer_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "overall_timing": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "format": {
+            "is_feasible": true,
+            "issues": []
+          }
+        }
+      }
+    },
+    {
+      "attempt": 2,
+      "itinerary": {
+        "name": "Custom Manhattan Tour",
+        "description": "A historical events-themed tour in Manhattan covering the Statue of Liberty, Ellis Island, and the Tenement Museum.",
+        "events": [
+          {
+            "id": "event1",
+            "name": "Visit Statue of Liberty",
+            "description": "Explore the iconic Statue of Liberty, a symbol of freedom and democracy.",
+            "start_time": "2023-07-10T09:00:00",
+            "end_time": "2023-07-10T11:00:00",
+            "venue_name": "Statue of Liberty",
+            "cost": 25
+          },
+          {
+            "id": "event2",
+            "name": "Visit Ellis Island",
+            "description": "Discover the history of immigration at Ellis Island, a gateway to the United States.",
+            "start_time": "2023-07-10T11:30:00",
+            "end_time": "2023-07-10T13:30:00",
+            "venue_name": "Ellis Island",
+            "cost": 18
+          },
+          {
+            "id": "event3",
+            "name": "Visit Tenement Museum",
+            "description": "Experience the immigrant stories at the Tenement Museum, depicting life in 19th and 20th-century New York.",
+            "start_time": "2023-07-10T15:00:00",
+            "end_time": "2023-07-10T17:00:00",
+            "venue_name": "Tenement Museum",
+            "cost": 15
+          }
+        ],
+        "venues": [
+          {
+            "name": "Statue of Liberty",
+            "address": "New York, NY 10004, United States",
+            "latitude": 40.689247,
+            "longitude": -74.044502,
+            "opening_hours": "08:30-17:00",
+            "place_id": "ChIJPTacEpBQwokRKwIlDXelxkA"
+          },
+          {
+            "name": "Ellis Island",
+            "address": "Ellis Island, United States",
+            "latitude": 40.699717,
+            "longitude": -74.03921,
+            "opening_hours": "09:30-16:30",
+            "place_id": "ChIJSUNyvUBT1IkRZbnieAegxLk"
+          },
+          {
+            "name": "Tenement Museum",
+            "address": "103 Orchard St, New York, NY 10002, United States",
+            "latitude": 40.718754,
+            "longitude": -73.990854,
+            "opening_hours": "10:00-18:30",
+            "place_id": "ChIJQ2_oHodZwokRgXW6oM0j3dE"
+          }
+        ],
+        "routes": [
+          {
+            "from": "Statue of Liberty",
+            "to": "Ellis Island",
+            "mode": "Public Transport"
+          },
+          {
+            "from": "Ellis Island",
+            "to": "Tenement Museum",
+            "mode": "Public Transport"
+          }
+        ]
+      },
+      "verification": {
+        "is_feasible": true,
+        "total_issues": 0,
+        "all_issues": [],
+        "details": {
+          "venue_hours": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "travel_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "activity_durations": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "buffer_times": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "overall_timing": {
+            "is_feasible": true,
+            "issues": []
+          },
+          "format": {
+            "is_feasible": true,
+            "issues": []
+          }
+        }
+      }
+    }
+  ],
+  "total_attempts": 2
+}
